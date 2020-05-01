@@ -11,12 +11,13 @@ from cuTWED import twed
 n = 10000
 rng = RandomState(42)
 noise1 = rng.randn(n)
-noise2 = rng.randn(n)
     
 TA = np.arange(n, dtype=np.float64)
 A = np.sin(TA) + np.sin(TA/10) + noise1
-    
-TB = np.arange(n, dtype=np.float64)
+
+m = 2 * n
+noise2 = rng.randn(m)
+TB = np.arange(m, dtype=np.float64)
 B = np.sin(TB) + np.sin(TB/10) + noise2
 
 # Set algo params
