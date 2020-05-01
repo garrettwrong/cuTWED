@@ -107,7 +107,7 @@ void CTWED(double ta[], int *la, double tsa[], double tb[], int *lb, double tsb[
                                 (*dist)+=pow(fabs(ta[i-2]-tb[j-2]),deg);
 
                 D[i][j]=*dist;
-                //checked printf("D[ %d ][ %d ] = %f\n", i, j, *dist);
+                //printf("D[ %d ][ %d ] = %f\n", i, j, *dist);
                 }
         }// for i
         
@@ -159,7 +159,6 @@ void CTWED(double ta[], int *la, double tsa[], double tb[], int *lb, double tsb[
         /* } */
 
 
-        
         // freeing
         for(i=0; i<=r; i++) {
                 free(D[i]);
@@ -180,7 +179,7 @@ int main(int argc, char** argv){
   double dist = -1;
   
   CTWED(A, &nA, TA, B, &nB, TB, &nu, &lambda, &degree, &dist);
-  printf("CTWED dist: %g\n", dist);
+  printf("CTWED dist: %f\n", dist);
   
 }
 

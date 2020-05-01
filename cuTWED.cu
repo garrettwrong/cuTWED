@@ -33,7 +33,7 @@ __global__ void local_distance_kernel(double A[], int nA, int degree, double DA[
   // implicitly assumed D can hold nA + 1 elements.
   const int tid = blockIdx.x * blockDim.x + threadIdx.x;
   double d;
-  
+
   if( tid > nA ) return;
 
   if(tid == 0){
@@ -51,9 +51,9 @@ __global__ void local_distance_kernel(double A[], int nA, int degree, double DA[
 __global__ void dp_distance_kernel(double A[], int nA, double B[], int nB, int degree, double DP[]){
   const int tidA = blockIdx.x * blockDim.x + threadIdx.x;
   const int tidB = blockIdx.y * blockDim.y + threadIdx.y;
-  const size_t tidD = tidB * (nA + 1) + tidA;
+  const size_t tidD = tidA * (nB + 1) + tidB;
   double d;
-  
+
   if(tidA >nA || tidB > nB) return;
 
   if(tidA==0 && tidB==0){
@@ -67,7 +67,7 @@ __global__ void dp_distance_kernel(double A[], int nA, double B[], int nB, int d
       d += pow( fabs( A[tidA - 2] - B[tidB - 2]), degree);
     }
   }
-  
+
   DP[tidD] = d;
 }
 
@@ -86,18 +86,17 @@ __global__ void evalZ_kernel(int diagIdx,
   const int row = tid;
   const int col = diagIdx - tid;
   if(row<1 || col <1) return;
-  if(row > nB || col > nA) return;
-  //printf("r c %d %d\n", row, col);
+  if(row > nA || col > nB) return;
 
   // get computing DP indexes out of the way
-  const size_t tidD = row * (nA+1) + col;
+  const size_t tidD = row * (nB+1) + col;
   // lag one row
-  const size_t tidDrm1 = (row-1) * (nA+1) + col;
+  const size_t tidDrm1 = (row-1) * (nB+1) + col;
   // lag one col
   const size_t tidDcm1 = tidD - 1;
   // lag one row and one col
   const size_t tidDrm1cm1 = tidDrm1 - 1;
-  
+
   double htrans;
   double dmin;
   double dist;
@@ -113,7 +112,7 @@ __global__ void evalZ_kernel(int diagIdx,
   if(row>1)
     htrans = ((double)(TA[row-1] - TA[row-2]));
   else htrans = (double)TA[row-1];
-  dist = DB[row] + DP[tidDrm1] + lambda + nu * htrans;
+  dist = DA[row] + DP[tidDrm1] + lambda + nu * htrans;
   // check if we need to assign new min
   if(dist<dmin){
     dmin = dist;
@@ -123,7 +122,7 @@ __global__ void evalZ_kernel(int diagIdx,
   if(col>1)
     htrans = ((double)(TB[col-1] - TB[col-2]));
   else htrans = (double)TB[col-1];
-  dist = DA[col] + DP[tidDcm1] + lambda + nu * htrans; 
+  dist = DB[col] + DP[tidDcm1] + lambda + nu * htrans;
   if(dist<dmin){
     dmin = dist;
   }
@@ -144,29 +143,16 @@ static void evalZ(double DP[],
   n = (nA+1) + (nB+1);
 
   for(diagIdx=1; diagIdx < n; diagIdx++){
-    //printf("diagIdx: %d\n", diagIdx);
     dim3 block_dim(blocksz);
     dim3 grid_dim((diagIdx + block_dim.x)/ block_dim.x);
     evalZ_kernel<<<grid_dim, block_dim>>>(diagIdx,DP, DA, nA, TA, DB, nB, TB, nu, lambda);
     HANDLE_ERROR(cudaPeekAtLastError());
-
-    // // debug
-    // printf("DP:\n");
-    // double *DP_h = (double*)calloc((nA+1)*(nB+1), sizeof(double));
-    // HANDLE_ERROR(cudaMemcpy(DP_h, DP, (nA+1)*(nB+1)*sizeof(double), cudaMemcpyDeviceToHost));
-    // for(int r=0; r<= nA; r++){
-    //   for(int c=0; c<= nB; c++){
-    //     printf("%f, ", DP_h[r*(nB+1) + c]);
-    //   }
-    //   printf("\n");
-    // }
-    // free(DP_h);
   }
 }
 
 
-#ifdef __cplusplus  
-extern "C" { 
+#ifdef __cplusplus
+extern "C" {
 #endif
 double twed(double A[], int nA, double TA[],
             double B[], int nB, double TB[],
@@ -180,7 +166,7 @@ double twed(double A[], int nA, double TA[],
 
   dim3 block_dim;
   dim3 grid_dim;
-  
+
   //malloc on gpu and copy
   sz = nA*sizeof(*A) + 1;
   HANDLE_ERROR(cudaMalloc(&A_dev, sz));
@@ -200,10 +186,10 @@ double twed(double A[], int nA, double TA[],
   grid_dim.x = (nA + block_dim.x - 1) / block_dim.x;
   local_distance_kernel<<<grid_dim, block_dim>>>(A_dev, nA, degree, DA_dev);
   HANDLE_ERROR(cudaPeekAtLastError());
-    
+
   // compute initial distance B
   block_dim.x = 256;
-  grid_dim.x = (nA + block_dim.x - 1) / block_dim.x;
+  grid_dim.x = (nB + block_dim.x - 1) / block_dim.x;
   local_distance_kernel<<<grid_dim, block_dim>>>(B_dev, nB, degree, DB_dev);
   HANDLE_ERROR(cudaPeekAtLastError());
 
@@ -222,7 +208,7 @@ double twed(double A[], int nA, double TA[],
   HANDLE_ERROR(cudaMemcpy(A_dev, TA, sz, cudaMemcpyHostToDevice));
   sz = nB * sizeof(*TB);
   HANDLE_ERROR(cudaMemcpy(B_dev, TB, sz, cudaMemcpyHostToDevice));
- 
+
   // iteratively update the DP matrix
   //   we process diagonals moving the diagonal from upper left to lower right,
   //         each element of a diag can is done in parallel.
@@ -236,27 +222,16 @@ double twed(double A[], int nA, double TA[],
     HANDLE_ERROR(cudaMemcpy(DP, DP_dev, (nA+1)*(nB+1)*sizeof(double), cudaMemcpyDeviceToHost));
   }
 
-  // // debug
-  // printf("DP:\n");
-  // double *DP = (double*)calloc((nA+1)*(nB+1), sizeof(double));
-  // HANDLE_ERROR(cudaMemcpy(DP, DP_dev, (nA+1)*(nB+1)*sizeof(double), cudaMemcpyDeviceToHost));
-  // for(int r=0; r<= nA; r++){
-  //   for(int c=0; c<= nB; c++){
-  //     printf("%f, ", DP[r*(nB+1) + c]);
-  //   }
-  //   printf("\n");
-  // }
-
   //cleanup
   HANDLE_ERROR(cudaFree(A_dev));
   HANDLE_ERROR(cudaFree(DA_dev));
   HANDLE_ERROR(cudaFree(B_dev));
   HANDLE_ERROR(cudaFree(DB_dev));
   HANDLE_ERROR(cudaFree(DP_dev));
-  
-  return result;  
+
+  return result;
 }
 
-#ifdef __cplusplus  
+#ifdef __cplusplus
 }
-#endif 
+#endif
