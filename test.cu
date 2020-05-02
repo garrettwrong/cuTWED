@@ -6,16 +6,18 @@
 
 int main(int argc, char** argv){
 
-  double nu = 1.;
-  double lambda = 1.;
   int degree = 2;
-  double dist = -1;
+
+  /* REAL_t is either double or float */
+  REAL_t nu = 1.;
+  REAL_t lambda = 1.;
+  REAL_t dist = -1;
   
   dist = twed(A, nA, TA, B, nB, TB, nu, lambda, degree, NULL);
 
   /* to return DP for inspection
-  double* DP;
-  DP = (double*)calloc((nA+1)*(nB+1), sizeof(*DP));
+  REAL_t* DP;
+  DP = (REAL_t*)calloc((nA+1)*(nB+1), sizeof(*DP));
   dist = twed(A, nA, TA, B, nB, TB, nu, lambda, degree, DP);
   */
   printf("ctwed dist: %lf\n", dist);

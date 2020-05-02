@@ -19,22 +19,20 @@
 
 #include "cuTWED.h"
 
-#define REAL_t double
-
 #define HANDLE_ERROR(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true)
 {
-   if (code != cudaSuccess)
-   {
-      fprintf(stderr,"GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
-      if (abort) exit(code);
-   }
+  if (code != cudaSuccess)
+  {
+    fprintf(stderr,"GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
+    if (abort) exit(code);
+  }
 }
 
-__global__ void local_distance_kernel(double A[], int nA, int degree, double DA[]){
+__global__ void local_distance_kernel(REAL_t A[], int nA, int degree, REAL_t DA[]){
   // implicitly assumed D can hold nA + 1 elements.
   const int tid = blockIdx.x * blockDim.x + threadIdx.x;
-  double d;
+  REAL_t d;
 
   if( tid > nA ) return;
 
@@ -50,11 +48,11 @@ __global__ void local_distance_kernel(double A[], int nA, int degree, double DA[
   DA[tid] = d;
 }
 
-__global__ void dp_distance_kernel(double A[], int nA, double B[], int nB, int degree, double DP[]){
+__global__ void dp_distance_kernel(REAL_t A[], int nA, REAL_t B[], int nB, int degree, REAL_t DP[]){
   const int tidA = blockIdx.x * blockDim.x + threadIdx.x;
   const int tidB = blockIdx.y * blockDim.y + threadIdx.y;
   const size_t tidD = tidA * (nB + 1) + tidB;
-  double d;
+  REAL_t d;
 
   if(tidA >nA || tidB > nB) return;
 
@@ -75,10 +73,10 @@ __global__ void dp_distance_kernel(double A[], int nA, double B[], int nB, int d
 
 
 __global__ void evalZ_kernel(int diagIdx,
-                             double DP[],
-                             double DA[], int nA, double TA[],
-                             double DB[], int nB, double TB[],
-                             double nu, double lambda){
+                             REAL_t DP[],
+                             REAL_t DA[], int nA, REAL_t TA[],
+                             REAL_t DB[], int nB, REAL_t TB[],
+                             REAL_t nu, REAL_t lambda){
   const int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
   // bound, consider for non square later
@@ -99,21 +97,21 @@ __global__ void evalZ_kernel(int diagIdx,
   // lag one row and one col
   const size_t tidDrm1cm1 = tidDrm1 - 1;
 
-  double htrans;
-  double dmin;
-  double dist;
+  REAL_t htrans;
+  REAL_t dmin;
+  REAL_t dist;
 
   // case 1
-  htrans = fabs( (double)(TA[row-1] - TB[col-1]));
+  htrans = fabs( (REAL_t)(TA[row-1] - TB[col-1]));
   if(col>1 && row>1){
-    htrans += fabs((double)(TA[row-2] - TB[col-2]));
+    htrans += fabs((REAL_t)(TA[row-2] - TB[col-2]));
   }
   dmin = DP[tidDrm1cm1] + DP[tidD] + nu * htrans;
 
   // case 2
   if(row>1)
-    htrans = ((double)(TA[row-1] - TA[row-2]));
-  else htrans = (double)TA[row-1];
+    htrans = ((REAL_t)(TA[row-1] - TA[row-2]));
+  else htrans = (REAL_t)TA[row-1];
   dist = DA[row] + DP[tidDrm1] + lambda + nu * htrans;
   // check if we need to assign new min
   if(dist<dmin){
@@ -122,8 +120,8 @@ __global__ void evalZ_kernel(int diagIdx,
 
   // case 3
   if(col>1)
-    htrans = ((double)(TB[col-1] - TB[col-2]));
-  else htrans = (double)TB[col-1];
+    htrans = ((REAL_t)(TB[col-1] - TB[col-2]));
+  else htrans = (REAL_t)TB[col-1];
   dist = DB[col] + DP[tidDcm1] + lambda + nu * htrans;
   if(dist<dmin){
     dmin = dist;
@@ -134,10 +132,10 @@ __global__ void evalZ_kernel(int diagIdx,
 }
 
 
-static void evalZ(double DP[],
-           double DA[], int nA, double TA[],
-           double DB[], int nB, double TB[],
-           double nu, double lambda){
+static void evalZ(REAL_t DP[],
+                  REAL_t DA[], int nA, REAL_t TA[],
+                  REAL_t DB[], int nB, REAL_t TB[],
+                  REAL_t nu, REAL_t lambda){
   int blocksz = 32;  // note this particular var might be sensitive to tuning and architectures...
   int diagIdx;
   int n;
@@ -152,12 +150,13 @@ static void evalZ(double DP[],
   }
 }
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-void twed_malloc_dev(int nA, double **A_dev, double  **TA_dev,
-                     int nB, double **B_dev, double  **TB_dev,
-                     double **DP_dev){
+void twed_malloc_dev(int nA, REAL_t **A_dev, REAL_t  **TA_dev,
+                     int nB, REAL_t **B_dev, REAL_t  **TB_dev,
+                     REAL_t **DP_dev){
   //malloc on gpu and copy
   const size_t sza = (nA+1) * sizeof(**A_dev);
   HANDLE_ERROR(cudaMalloc(A_dev, sza));
@@ -174,12 +173,13 @@ void twed_malloc_dev(int nA, double **A_dev, double  **TA_dev,
 }
 #endif
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-void twed_free_dev(double *A_dev, double  *TA_dev,
-                   double *B_dev, double  *TB_dev,
-                   double *DP_dev){  
+void twed_free_dev(REAL_t *A_dev, REAL_t  *TA_dev,
+                   REAL_t *B_dev, REAL_t  *TB_dev,
+                   REAL_t *DP_dev){  
   //cleanup
   HANDLE_ERROR(cudaFree(A_dev));
   HANDLE_ERROR(cudaFree(TA_dev));
@@ -191,11 +191,12 @@ void twed_free_dev(double *A_dev, double  *TA_dev,
 }
 #endif
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-void twed_copy_to_dev(int nA, double A[], double A_dev[], double TA[], double TA_dev[],
-                      int nB, double B[], double B_dev[], double TB[], double TB_dev[]){ 
+void twed_copy_to_dev(int nA, REAL_t A[], REAL_t A_dev[], REAL_t TA[], REAL_t TA_dev[],
+                      int nB, REAL_t B[], REAL_t B_dev[], REAL_t TB[], REAL_t TB_dev[]){ 
   const size_t sza = nA*sizeof(*A);
   HANDLE_ERROR(cudaMemcpy(A_dev, A, sza, cudaMemcpyHostToDevice));
   HANDLE_ERROR(cudaMemcpy(TA_dev, TA, sza, cudaMemcpyHostToDevice));
@@ -211,12 +212,12 @@ void twed_copy_to_dev(int nA, double A[], double A_dev[], double TA[], double TA
 #ifdef __cplusplus
 extern "C" {
 #endif
-double twed_dev(double A_dev[], int nA, double TA_dev[],
-                double B_dev[], int nB, double TB_dev[],
-                double nu, double lambda, int degree,
-                double DP_dev[]){
-  double *DA_dev, *DB_dev;
-  double result;
+REAL_t twed_dev(REAL_t A_dev[], int nA, REAL_t TA_dev[],
+                REAL_t B_dev[], int nB, REAL_t TB_dev[],
+                REAL_t nu, REAL_t lambda, int degree,
+                REAL_t DP_dev[]){
+  REAL_t *DA_dev, *DB_dev;
+  REAL_t result;
 
   dim3 block_dim;
   dim3 grid_dim;
@@ -268,14 +269,14 @@ double twed_dev(double A_dev[], int nA, double TA_dev[],
 #ifdef __cplusplus
 extern "C" {
 #endif
-double twed(double A[], int nA, double TA[],
-            double B[], int nB, double TB[],
-            double nu, double lambda, int degree,
-            double* DP){
-  double *A_dev, *TA_dev;
-  double *B_dev, *TB_dev;
-  double *DP_dev;
-  double result;
+REAL_t twed(REAL_t A[], int nA, REAL_t TA[],
+            REAL_t B[], int nB, REAL_t TB[],
+            REAL_t nu, REAL_t lambda, int degree,
+            REAL_t* DP){
+  REAL_t *A_dev, *TA_dev;
+  REAL_t *B_dev, *TB_dev;
+  REAL_t *DP_dev;
+  REAL_t result;
 
   // malloc gpu arrays
   twed_malloc_dev(nA, &A_dev, &TA_dev,

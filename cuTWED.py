@@ -26,6 +26,12 @@ except OSError as e:
     print("Ensure you have added 'libcuTWED.so' somewhere in your LD_LIBRARY_PATH")
     raise e
 
+try:
+    _libcuTWED_32 = ctypes.CDLL('libcuTWED_32.so')
+except OSError as e:
+    print("Ensure you have added 'libcuTWED_32.so' somewhere in your LD_LIBRARY_PATH")
+    raise e
+
 _twed = _libcuTWED.twed
 _twed.restype = ctypes.c_double
 _twed.argtypes = (np.ctypeslib.ndpointer(dtype=np.float64, ndim=1, flags='C_CONTIGUOUS'),
@@ -38,6 +44,19 @@ _twed.argtypes = (np.ctypeslib.ndpointer(dtype=np.float64, ndim=1, flags='C_CONT
                   ctypes.c_double,
                   ctypes.c_int,
                   ctypes.c_void_p)
+
+_twed_32 = _libcuTWED_32.twed
+_twed_32.restype = ctypes.c_float
+_twed_32.argtypes = (np.ctypeslib.ndpointer(dtype=np.float32, ndim=1, flags='C_CONTIGUOUS'),
+                     ctypes.c_int,
+                     np.ctypeslib.ndpointer(dtype=np.float32, ndim=1, flags='C_CONTIGUOUS'),
+                     np.ctypeslib.ndpointer(dtype=np.float32, ndim=1, flags='C_CONTIGUOUS'),
+                     ctypes.c_int,
+                     np.ctypeslib.ndpointer(dtype=np.float32, ndim=1, flags='C_CONTIGUOUS'),
+                     ctypes.c_float,
+                     ctypes.c_float,
+                     ctypes.c_int,
+                     ctypes.c_void_p)
 
 
 def twed(A, TA, B, TB, nu, lamb, degree):
@@ -55,4 +74,12 @@ def twed(A, TA, B, TB, nu, lamb, degree):
     assert nB == len(TB)
     assert degree>0
 
-    return _twed(A, nA, TA, B, nB, TB, nu, lamb, degree, None)
+    if A.dtype == np.float64:
+        func = _twed
+    elif A.dtype == np.float32:
+        func = _twed32
+    else:
+        raise RuntimeError("Expected inputs to be np.float32 or np.float64")
+    
+    return func(A, nA, TA, B, nB, TB, nu, lamb, degree, None)
+
