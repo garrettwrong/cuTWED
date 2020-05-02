@@ -1,3 +1,9 @@
+/*
+  Demonstates basic cuTWED usage in C.
+
+  Copyright 2020 Garrett Wright, Gestalt Group LLC
+*/
+
 #include <stdio.h>
 
 #include "cuTWED.h"

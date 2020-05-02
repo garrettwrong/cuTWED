@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 """
-Example usage of gpuarray based cuTWED calls.
+Demonstrates usage of gpuarray based cuTWED calls.
 
 These are a special case where you already have input
 time series residing in gpu memory.  The cononical way
 to use gpu memory in python is through PyCUDA.
+
+Copyright 2020 Garrett Wright, Gestalt Group LLC
 """
 
 import numpy as np

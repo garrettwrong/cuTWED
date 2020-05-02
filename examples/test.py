@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+"""
+Demonstates basic cuTWED usage
+
+Copyright 2020 Garrett Wright, Gestalt Group LLC
+"""
 
 import numpy as np
 from numpy.random import RandomState
