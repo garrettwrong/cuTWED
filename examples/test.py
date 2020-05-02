@@ -29,3 +29,12 @@ degree = 2
 dist = twed(A, TA, B, TB, nu, lamb, degree)
 
 print('Python cuTWED distance: {:f}'.format(dist))
+
+
+## We can run the same call in single precision by feeding different types.
+# Call TWED
+dist = twed(A.astype(np.float32), TA.astype(np.float32),
+            B.astype(np.float32), TB.astype(np.float32),
+            nu, lamb, degree)
+
+print('Python cuTWED distance (single precision): {:f}'.format(dist))
