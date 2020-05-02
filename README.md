@@ -27,7 +27,7 @@ The problem is `O(n^2)` in memory for time series of length n.
 make -j
 ```
 
-The makefile is intentionally simple, so it can be edited to suit your needs.
+The makefile is pretty basic so it can be edited to suit your needs.
 
 This builds on OSX and multiple flavors of Linux with more/less default installs.
 If you would like to pursue Windows, please do and report back, I can try to integrate the effort.
@@ -37,6 +37,19 @@ If you would like to pursue Windows, please do and report back, I can try to int
 #### C/C++
 
 In C/C++ you should be able to `include "cuTWED.h"` and link with the shared library `libcuTWED.so`.
+This is what I do in `test.x`.
+
+A 32bit library is also built `libcuTWED_32.so`, containing functions with the same names.
+You may choose which one is suitable for your application.  This is what I use in `test_32.x`.
+
+There are two main ways to invoke the cuTWED alogorithm, `twed` and `twed_dev`.
+First is the most common way, where you pass C arrays on the host,
+and the library manages device memory and transfers for you.
+
+Alternatively, if you are already managing GPU memory,
+you may use twed_dev which expects pointers to memory to reside on the gpu.
+I have also provided malloc, copy, and free helpers in case it makes sense to reuse memory.
+_All logic and size checks for such advanced cases are expected to be owned by the user._
 
 #### Python
 
@@ -47,6 +60,9 @@ The following works for me out of the box on linux for quick development:
 make -j
 python examples/test.py
 ```
+
+I have also wrapped up the GPU only memory methods in python, using PyCUDA gpuarrays.  Examples in
+double and single precision are in `example/test_dev.py`.
 
 ## License
 
