@@ -29,4 +29,3 @@ degree = 2
 dist = twed(A, TA, B, TB, nu, lamb, degree)
 
 print('Python cuTWED distance: {:f}'.format(dist))
-# ref: 29869
