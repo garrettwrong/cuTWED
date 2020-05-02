@@ -179,7 +179,7 @@ extern "C" {
 #endif
 void twed_free_dev(REAL_t *A_dev, REAL_t  *TA_dev,
                    REAL_t *B_dev, REAL_t  *TB_dev,
-                   REAL_t *DP_dev){  
+                   REAL_t *DP_dev){
   //cleanup
   HANDLE_ERROR(cudaFree(A_dev));
   HANDLE_ERROR(cudaFree(TA_dev));
@@ -196,7 +196,7 @@ void twed_free_dev(REAL_t *A_dev, REAL_t  *TA_dev,
 extern "C" {
 #endif
 void twed_copy_to_dev(int nA, REAL_t A[], REAL_t A_dev[], REAL_t TA[], REAL_t TA_dev[],
-                      int nB, REAL_t B[], REAL_t B_dev[], REAL_t TB[], REAL_t TB_dev[]){ 
+                      int nB, REAL_t B[], REAL_t B_dev[], REAL_t TB[], REAL_t TB_dev[]){
   const size_t sza = nA*sizeof(*A);
   HANDLE_ERROR(cudaMemcpy(A_dev, A, sza, cudaMemcpyHostToDevice));
   HANDLE_ERROR(cudaMemcpy(TA_dev, TA, sza, cudaMemcpyHostToDevice));
@@ -258,7 +258,7 @@ REAL_t twed_dev(REAL_t A_dev[], int nA, REAL_t TA_dev[],
 
   HANDLE_ERROR(cudaFree(DA_dev));
   HANDLE_ERROR(cudaFree(DB_dev));
-  
+
   return result;
 }
 #ifdef __cplusplus

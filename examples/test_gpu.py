@@ -23,7 +23,7 @@ from cuTWED import twed_dev
 n = 10000
 rng = RandomState(42)
 noise1 = rng.randn(n)
-    
+
 TA = np.arange(n, dtype=np.float64)
 A = np.sin(TA) + np.sin(TA/10) + noise1
 
