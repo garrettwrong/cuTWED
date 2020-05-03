@@ -29,7 +29,7 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
   }
 }
 
-__global__ void local_distance_kernel(REAL_t A[], int nA, int degree, REAL_t DA[]){
+__global__ void local_distance_kernel(const REAL_t* __restrict__ A, int nA, int degree, REAL_t* __restrict__ DA){
   // implicitly assumed D can hold nA + 1 elements.
   const int tid = blockIdx.x * blockDim.x + threadIdx.x;
   REAL_t d;
@@ -48,7 +48,7 @@ __global__ void local_distance_kernel(REAL_t A[], int nA, int degree, REAL_t DA[
   DA[tid] = d;
 }
 
-__global__ void dp_distance_kernel(REAL_t A[], int nA, REAL_t B[], int nB, int degree, REAL_t DP[]){
+__global__ void dp_distance_kernel(const REAL_t* __restrict__ A, int nA, const REAL_t* __restrict__ B, int nB, int degree, REAL_t* __restrict__ DP){
   const int tidA = blockIdx.x * blockDim.x + threadIdx.x;
   const int tidB = blockIdx.y * blockDim.y + threadIdx.y;
   const size_t tidD = tidA * (nB + 1) + tidB;
@@ -83,9 +83,9 @@ static __inline__ __host__ __device__ diagIdx_t map_diag_to_mat(int orth_diag, i
 }
 
 __global__ void evalZ_kernel(int diagIdx,
-                             REAL_t DP[],
-                             REAL_t DA[], int nA, REAL_t TA[],
-                             REAL_t DB[], int nB, REAL_t TB[],
+                             REAL_t* __restrict__ DP,
+                             const REAL_t* __restrict__ DA, int nA, const REAL_t* __restrict__ TA,
+                             const REAL_t* __restrict__ DB, int nB, const REAL_t* __restrict__ TB,
                              REAL_t nu, REAL_t lambda){
   const int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
