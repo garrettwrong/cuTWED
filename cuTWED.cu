@@ -71,6 +71,16 @@ __global__ void dp_distance_kernel(REAL_t A[], int nA, REAL_t B[], int nB, int d
   DP[tidD] = d;
 }
 
+typedef struct diagIdx {
+  int row;
+  int col;
+} diagIdx_t;
+
+static __inline__ __host__ __device__ diagIdx_t map_diag_to_mat(int orth_diag, int idx){
+  /* orth_diag is the zero based ortho diagonal,
+     idx is the zero based index into orth_diag */
+  return {idx, orth_diag - idx};
+}
 
 __global__ void evalZ_kernel(int diagIdx,
                              REAL_t DP[],
@@ -83,8 +93,9 @@ __global__ void evalZ_kernel(int diagIdx,
   if(tid > diagIdx) return;
 
   // map from the diagonal index and thread into the DP row/col
-  const int row = tid;
-  const int col = diagIdx - tid;
+  const diagIdx_t id = map_diag_to_mat(diagIdx, tid);
+  const int row = id.row;
+  const int col = id.col; //diagIdx - tid;
   if(row<1 || col <1) return;
   if(row > nA || col > nB) return;
 
