@@ -233,6 +233,13 @@ REAL_t twed_dev(REAL_t A_dev[], int nA, REAL_t TA_dev[],
   dim3 block_dim;
   dim3 grid_dim;
 
+  const int nstreams = 3;
+  int s;
+  cudaStream_t streams[nstreams];
+  for(s=0; s<nstreams; s++){
+    HANDLE_ERROR(cudaStreamCreate(&streams[s]));
+  }
+
   const size_t sza = (nA+1) * sizeof(*A_dev);
   const size_t szb = (nB+1) * sizeof(*B_dev);
   HANDLE_ERROR(cudaMalloc(&DA_dev, sza));
@@ -270,6 +277,10 @@ REAL_t twed_dev(REAL_t A_dev[], int nA, REAL_t TA_dev[],
   HANDLE_ERROR(cudaFree(DA_dev));
   HANDLE_ERROR(cudaFree(DB_dev));
 
+  for(s=0; s<nstreams; s++){
+    HANDLE_ERROR(cudaStreamDestroy(streams[s]));
+  }
+  
   return result;
 }
 #ifdef __cplusplus
