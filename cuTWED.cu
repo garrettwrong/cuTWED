@@ -16,6 +16,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "cuTWED.h"
 
@@ -48,65 +49,79 @@ __global__ void local_distance_kernel(const REAL_t* __restrict__ A, int nA, int 
   DA[tid] = d;
 }
 
-__global__ void dp_distance_kernel(const REAL_t* __restrict__ A, int nA, const REAL_t* __restrict__ B, int nB, int degree, REAL_t* __restrict__ DP){
-  const int tidA = blockIdx.x * blockDim.x + threadIdx.x;
-  const int tidB = blockIdx.y * blockDim.y + threadIdx.y;
-  const size_t tidD = tidA * (nB + 1) + tidB;
-  REAL_t d;
 
-  if(tidA >nA || tidB > nB) return;
-
-  if(tidA==0 && tidB==0){
-    d = 0;
-  } else if(tidA==0 || tidB==0){
-    d = INFINITY;
-  }
-  else{
-    d = pow( fabs( A[tidA - 1] - B[tidB - 1]), degree);
-    if(tidA>1 && tidB>1){
-      d += pow( fabs( A[tidA - 2] - B[tidB - 2]), degree);
-    }
-  }
-
-  DP[tidD] = d;
-}
-
-typedef struct diagIdx {
+typedef struct rcIdx {
   int row;
   int col;
+} rcIdx_t;
+
+typedef struct diagIdx {
+  int orth_diag;
+  int idx;
 } diagIdx_t;
 
-static __inline__ __host__ __device__ diagIdx_t map_diag_to_mat(int orth_diag, int idx){
+static __inline__ __host__ __device__ rcIdx_t map_diag_to_rc(int orth_diag, int idx){
   /* orth_diag is the zero based ortho diagonal,
      idx is the zero based index into orth_diag */
-  return {idx, orth_diag - idx};
+  return { orth_diag - idx, idx};
 }
 
+static __inline__ __host__ __device__ diagIdx_t map_rc_to_diag(int row, int col){
+  /* orth_diag is the zero based ortho diagonal,
+     idx is the zero based index into orth_diag */
+  return {row+col, col};
+}
+
+
 __global__ void evalZ_kernel(int diagIdx,
-                             REAL_t* __restrict__ DP,
-                             const REAL_t* __restrict__ DA, int nA, const REAL_t* __restrict__ TA,
-                             const REAL_t* __restrict__ DB, int nB, const REAL_t* __restrict__ TB,
-                             REAL_t nu, REAL_t lambda){
+                             REAL_t* DP_diag_lag_2,
+                             REAL_t* DP_diag_lag,
+                             REAL_t* DP_diag,
+                             const REAL_t* __restrict__ A, const REAL_t* __restrict__ DA, int nA, const REAL_t* __restrict__ TA,
+                             const REAL_t* __restrict__ B, const REAL_t* __restrict__ DB, int nB, const REAL_t* __restrict__ TB,
+                             REAL_t nu, int degree, REAL_t lambda){
   const int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
-  // bound, consider for non square later
   if(tid > diagIdx) return;
 
   // map from the diagonal index and thread into the DP row/col
-  const diagIdx_t id = map_diag_to_mat(diagIdx, tid);
+  const rcIdx_t id = map_diag_to_rc(diagIdx, tid);
   const int row = id.row;
   const int col = id.col; //diagIdx - tid;
-  if(row<1 || col <1) return;
-  if(row > nA || col > nB) return;
 
   // get computing DP indexes out of the way
-  const size_t tidD = row * (nB+1) + col;
   // lag one row
-  const size_t tidDrm1 = (row-1) * (nB+1) + col;
+  const size_t tidDrm1 = map_rc_to_diag(row-1, col).idx;
+  assert( map_rc_to_diag(row-1, col).orth_diag == diagIdx -1);
   // lag one col
-  const size_t tidDcm1 = tidD - 1;
+  const size_t tidDcm1 = map_rc_to_diag(row, col-1).idx;
+  assert( map_rc_to_diag(row, col-1).orth_diag == diagIdx -1);
   // lag one row and one col
-  const size_t tidDrm1cm1 = tidDrm1 - 1;
+  const size_t tidDrm1cm1 = map_rc_to_diag(row-1, col-1).idx;
+  assert( map_rc_to_diag(row-1, col-1).orth_diag == diagIdx -2);
+
+  if(row > nA || col > nB) return;
+
+  //dp dist
+  REAL_t d;
+  if(row==0 && col==0){
+    d = 0;
+  } else if(row==0 || col==0){
+    d = INFINITY;
+  }
+  else{
+    d = pow( fabs( A[row - 1] - B[col - 1]), degree);
+    if(row>1 && col>1){
+      d += pow( fabs( A[row - 2] - B[col - 2]), degree);
+    }
+  }
+
+  //DBG printf("d [%d] = %f;\n", tid, d);
+  if(row<1 || col <1) {
+    DP_diag[tid] = d;
+    return;
+  }
+
 
   REAL_t htrans;
   REAL_t dmin;
@@ -117,47 +132,114 @@ __global__ void evalZ_kernel(int diagIdx,
   if(col>1 && row>1){
     htrans += fabs((REAL_t)(TA[row-2] - TB[col-2]));
   }
-  dmin = DP[tidDrm1cm1] + DP[tidD] + nu * htrans;
+  //DBG printf("DP_diag_lag_2[tidDrm1cm1= %ld] = %f\n", tidDrm1cm1, DP_diag_lag_2[tidDrm1cm1]);
+  dmin = DP_diag_lag_2[tidDrm1cm1] + d + nu * htrans;
 
   // case 2
   if(row>1)
     htrans = ((REAL_t)(TA[row-1] - TA[row-2]));
   else htrans = (REAL_t)TA[row-1];
-  dist = DA[row] + DP[tidDrm1] + lambda + nu * htrans;
+  dist = DA[row] + DP_diag_lag[tidDrm1] + lambda + nu * htrans;
   // check if we need to assign new min
-  if(dist<dmin){
-    dmin = dist;
-  }
+  dmin = fmin(dmin, dist);
 
   // case 3
   if(col>1)
     htrans = ((REAL_t)(TB[col-1] - TB[col-2]));
   else htrans = (REAL_t)TB[col-1];
-  dist = DB[col] + DP[tidDcm1] + lambda + nu * htrans;
-  if(dist<dmin){
-    dmin = dist;
-  }
+  dist = DB[col] + DP_diag_lag[tidDcm1] + lambda + nu * htrans;
+  // check if we need to assign new min
+  dmin = fmin(dmin, dist);
 
   // assign result to dynamic program matrix
-  DP[tidD] = dmin;
+  DP_diag[tid] = dmin;
+  //DBG DP_diag[tid] = diagIdx;
+
 }
 
 
-static void evalZ(REAL_t DP[],
-                  REAL_t DA[], int nA, REAL_t TA[],
-                  REAL_t DB[], int nB, REAL_t TB[],
-                  REAL_t nu, REAL_t lambda){
-  int blocksz = 32;  // note this particular var might be sensitive to tuning and architectures...
+static void evalZ(REAL_t DP_diag[],
+                  const REAL_t* __restrict__ A, const REAL_t* __restrict__ DA, int nA, const REAL_t* __restrict__ TA,
+                  const REAL_t* __restrict__ B, const REAL_t* __restrict__ DB, int nB, const REAL_t* __restrict__ TB,
+                  REAL_t nu, int degree, REAL_t lambda){
+  const int n = (nA+1) + (nB+1) -1;
+  dim3 block_dim(32); // note this particular var might be sensitive to tuning and architectures...
   int diagIdx;
-  int n;
 
-  n = (nA+1) + (nB+1);
+  REAL_t* tmp_ptr=NULL;
+  REAL_t* DP_diag_lag;
+  REAL_t* DP_diag_lag_2;
+  const size_t sz = n * sizeof(*DP_diag_lag);
+  HANDLE_ERROR(cudaMalloc(&DP_diag_lag, sz));
+  HANDLE_ERROR(cudaMalloc(&DP_diag_lag_2, sz));
 
-  for(diagIdx=1; diagIdx < n; diagIdx++){
-    dim3 block_dim(blocksz);
+  HANDLE_ERROR(cudaPeekAtLastError());
+
+  for(diagIdx=0; diagIdx < n; diagIdx++){
+
+    tmp_ptr = DP_diag_lag_2;
+    DP_diag_lag_2 = DP_diag_lag;
+    DP_diag_lag = DP_diag;
+    DP_diag = tmp_ptr;
+
     dim3 grid_dim((diagIdx + block_dim.x)/ block_dim.x);
-    evalZ_kernel<<<grid_dim, block_dim>>>(diagIdx,DP, DA, nA, TA, DB, nB, TB, nu, lambda);
+    evalZ_kernel<<<grid_dim, block_dim>>>(diagIdx, DP_diag_lag_2, DP_diag_lag, DP_diag, A, DA, nA, TA, B, DB, nB, TB, nu, degree, lambda);
     HANDLE_ERROR(cudaPeekAtLastError());
+
+
+    /*
+    // DBG
+    REAL_t* tmp = (REAL_t*)calloc(n, sizeof(REAL_t));
+    HANDLE_ERROR(cudaMemcpy(tmp, DP_diag_lag_2, sz, cudaMemcpyDeviceToHost));
+    printf("\n\n\nDiag LAG-2 (%d)\n", diagIdx-2);
+    for(int r=0; r<= nA; r++){
+      for(int c=0; c<= nB; c++){
+        if(map_rc_to_diag(r, c).orth_diag == diagIdx-2){
+          //printf("%d %d \t %d %d\n", r, c, map_rc_to_diag(r,c).orth_diag, map_rc_to_diag(r,c).idx);
+          printf("%f, ", tmp[map_rc_to_diag(r,c).idx]);
+        } else printf("_, ");
+      }
+      printf("\n");
+    }
+
+    HANDLE_ERROR(cudaMemcpy(tmp, DP_diag_lag, sz, cudaMemcpyDeviceToHost));
+    printf("\nDiag LAG-1 (%d)\n", diagIdx-1);
+    for(int r=0; r<= nA; r++){
+      for(int c=0; c<= nB; c++){
+        if(map_rc_to_diag(r, c).orth_diag == diagIdx-1){
+          //printf("%d %d \t %d %d\n", r, c, map_rc_to_diag(r,c).orth_diag, map_rc_to_diag(r,c).idx);
+          printf("%f, ", tmp[map_rc_to_diag(r,c).idx]);
+        } else printf("_, ");
+      }
+      printf("\n");
+    }
+
+    HANDLE_ERROR(cudaMemcpy(tmp, DP_diag, sz, cudaMemcpyDeviceToHost));
+    printf("\nDiag (%d)\n", diagIdx);
+    for(int r=0; r<= nA; r++){
+      for(int c=0; c<= nB; c++){
+        if(map_rc_to_diag(r, c).orth_diag == diagIdx){
+        //printf("%d %d \t %d %d\n", r, c, map_rc_to_diag(r,c).orth_diag, map_rc_to_diag(r,c).idx);
+          printf("%f, ", tmp[map_rc_to_diag(r,c).idx]);
+        } else printf("_, ");
+      }
+      printf("\n");
+    }
+    free(tmp);
+    // DBG
+    */
+
+  }
+
+  int r = n;
+  while (r%3 !=0){
+    // we need to cycle our pointers...
+    tmp_ptr = DP_diag_lag_2;
+    DP_diag_lag_2 = DP_diag_lag;
+    DP_diag_lag = DP_diag;
+    DP_diag = tmp_ptr;
+    HANDLE_ERROR(cudaMemcpy(DP_diag, DP_diag_lag, sz, cudaMemcpyDeviceToDevice));
+    r++;
   }
 }
 
@@ -177,7 +259,7 @@ void twed_malloc_dev(int nA, REAL_t **A_dev, REAL_t  **TA_dev,
   HANDLE_ERROR(cudaMalloc(B_dev, szb));
   HANDLE_ERROR(cudaMalloc(TB_dev, szb));
 
-  const size_t sz = (nA+1) * (nB+1) * sizeof(**DP_dev);
+  const size_t sz = ((nA+1) + (nB+1) -1) * sizeof(**DP_dev);
   HANDLE_ERROR(cudaMalloc(DP_dev, sz));
 }
 #ifdef __cplusplus
@@ -233,7 +315,7 @@ REAL_t twed_dev(REAL_t A_dev[], int nA, REAL_t TA_dev[],
   dim3 block_dim;
   dim3 grid_dim;
 
-  const int nstreams = 3;
+  const int nstreams = 2;
   int s;
   cudaStream_t streams[nstreams];
   for(s=0; s<nstreams; s++){
@@ -245,34 +327,28 @@ REAL_t twed_dev(REAL_t A_dev[], int nA, REAL_t TA_dev[],
   HANDLE_ERROR(cudaMalloc(&DA_dev, sza));
   HANDLE_ERROR(cudaMalloc(&DB_dev, szb));
 
+
   // compute initial distance A
   block_dim.x = 256;
   grid_dim.x = (nA + block_dim.x - 1) / block_dim.x;
-  local_distance_kernel<<<grid_dim, block_dim>>>(A_dev, nA, degree, DA_dev);
+  local_distance_kernel<<<grid_dim, block_dim, 0, streams[0]>>>(A_dev, nA, degree, DA_dev);
   HANDLE_ERROR(cudaPeekAtLastError());
 
   // compute initial distance B
   block_dim.x = 256;
   grid_dim.x = (nB + block_dim.x - 1) / block_dim.x;
-  local_distance_kernel<<<grid_dim, block_dim>>>(B_dev, nB, degree, DB_dev);
+  local_distance_kernel<<<grid_dim, block_dim, 0, streams[1]>>>(B_dev, nB, degree, DB_dev);
   HANDLE_ERROR(cudaPeekAtLastError());
 
-  // compute initial dynamic program matrix D
-  block_dim.x = 32;
-  block_dim.y = 32;
-  // recall DP is nA+1 x nB+1
-  grid_dim.x = (nA + block_dim.x) / block_dim.x;
-  grid_dim.y = (nB + block_dim.y) / block_dim.y;
-  dp_distance_kernel<<<grid_dim, block_dim>>>(A_dev, nA, B_dev, nB, degree, DP_dev);
-  HANDLE_ERROR(cudaPeekAtLastError());
+  HANDLE_ERROR(cudaDeviceSynchronize());
 
   // iteratively update the DP matrix
   //   we process diagonals moving the diagonal from upper left to lower right,
   //         each element of a diag can is done in parallel.
-  evalZ(DP_dev, DA_dev, nA, TA_dev, DB_dev, nB, TB_dev, nu, lambda);
+  evalZ(DP_dev, A_dev, DA_dev, nA, TA_dev, B_dev, DB_dev, nB, TB_dev, nu, degree, lambda);
 
   // the algo result should be the final distance stored in DP
-  HANDLE_ERROR(cudaMemcpy(&result, &DP_dev[(nA+1) * (nB+1) - 1], sizeof(result), cudaMemcpyDeviceToHost));
+  HANDLE_ERROR(cudaMemcpy(&result, &DP_dev[map_rc_to_diag(nA, nB).idx], sizeof(result), cudaMemcpyDeviceToHost));
 
   HANDLE_ERROR(cudaFree(DA_dev));
   HANDLE_ERROR(cudaFree(DB_dev));
@@ -280,7 +356,7 @@ REAL_t twed_dev(REAL_t A_dev[], int nA, REAL_t TA_dev[],
   for(s=0; s<nstreams; s++){
     HANDLE_ERROR(cudaStreamDestroy(streams[s]));
   }
-  
+
   return result;
 }
 #ifdef __cplusplus
@@ -315,11 +391,12 @@ REAL_t twed(REAL_t A[], int nA, REAL_t TA[],
                     nu, lambda, degree,
                     DP_dev);
 
-  // optionally copy back DP matrix
-  if(DP != NULL){
-    const size_t sz = (nA+1) * (nB+1) * sizeof(*DP_dev);
-    HANDLE_ERROR(cudaMemcpy(&result, DP_dev, sz, cudaMemcpyDeviceToHost));
-  }
+  /// this isnt write for diagZ
+  // // optionally copy back DP matrix
+  // if(DP != NULL){
+  //   const size_t sz = (nA+1) * (nB+1) * sizeof(*DP_dev);
+  //   HANDLE_ERROR(cudaMemcpy(&result, DP_dev, sz, cudaMemcpyDeviceToHost));
+  // }
 
   // free device memory
   twed_free_dev(A_dev, TA_dev,
