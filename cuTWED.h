@@ -34,7 +34,7 @@ extern "C" {
   */
 REAL_t twed(REAL_t A[], int nA, REAL_t TA[],
             REAL_t B[], int nB, REAL_t TB[],
-            REAL_t nu, REAL_t lambda, int degree, REAL_t* DP);
+            REAL_t nu, REAL_t lambda, int degree);
 #ifdef __cplusplus  
 }
 #endif 
@@ -49,8 +49,7 @@ extern "C" {
    */
 REAL_t twed_dev(REAL_t A_dev[], int nA, REAL_t TA_dev[],
                 REAL_t B_dev[], int nB, REAL_t TB_dev[],
-                REAL_t nu, REAL_t lambda, int degree,
-                REAL_t DP_dev[]);
+                REAL_t nu, REAL_t lambda, int degree);
 #ifdef __cplusplus  
 }
 #endif 
@@ -60,8 +59,7 @@ REAL_t twed_dev(REAL_t A_dev[], int nA, REAL_t TA_dev[],
 extern "C" {
 #endif
 void twed_malloc_dev(int nA, REAL_t **A_dev, REAL_t  **TA_dev,
-                     int nB, REAL_t **B_dev, REAL_t  **TB_dev,
-                     REAL_t **DP_dev);
+                     int nB, REAL_t **B_dev, REAL_t  **TB_dev);
 #ifdef __cplusplus
 }
 #endif
@@ -74,8 +72,7 @@ extern "C" {
     Frees memory malloc'd in twed_malloc_dev
    */
 void twed_free_dev(REAL_t *A_dev, REAL_t  *TA_dev,
-                   REAL_t *B_dev, REAL_t  *TB_dev,
-                   REAL_t *DP_dev);
+                   REAL_t *B_dev, REAL_t  *TB_dev);
 #ifdef __cplusplus
 }
 #endif

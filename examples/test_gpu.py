@@ -60,5 +60,5 @@ TB_dev = gpuarray.to_gpu(TB.astype(np.float32))
 # Call TWED
 dist = twed_dev(A_dev, TA_dev, B_dev, TB_dev, nu, lamb, degree)
 
-print('Python gpuarray cuTWEDdistance (single precision): {:f}'.format(dist))
+print('Python gpuarray cuTWED distance (single precision): {:f}'.format(dist))
 

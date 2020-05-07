@@ -20,6 +20,12 @@
 
 #include "cuTWED.h"
 
+/* Flip on debug prints.
+   Warning, I don't recomend for large inputs, 10x20 ish is fine...
+*/
+/* #define DEBUG */
+  
+
 #define HANDLE_ERROR(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true)
 {
@@ -31,7 +37,7 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
 }
 
 __global__ void local_distance_kernel(const REAL_t* __restrict__ A, int nA, int degree, REAL_t* __restrict__ DA){
-  // implicitly assumed D can hold nA + 1 elements.
+  /* Implicitly assumed D can hold nA + 1 elements. */
   const int tid = blockIdx.x * blockDim.x + threadIdx.x;
   REAL_t d;
 
@@ -46,22 +52,28 @@ __global__ void local_distance_kernel(const REAL_t* __restrict__ A, int nA, int 
   else {
     d = pow( fabs( A[tid - 1] - A[tid - 2] ), degree);
   }
+
   DA[tid] = d;
 }
 
 
+/*
+  These are just some helper utilities,
+  mainly to help me remember how I translate between the index systems
+*/
+  
 typedef struct rcIdx {
   int row;
   int col;
 } rcIdx_t;
 
 typedef struct diagIdx {
-  int orth_diag;
-  int idx;
+  int orth_diag;  // the "left" diagonals
+  int idx; // index along the diag
 } diagIdx_t;
 
 static __inline__ __host__ __device__ rcIdx_t map_diag_to_rc(int orth_diag, int idx){
-  /* orth_diag is the zero based ortho diagonal,
+  /* orth_diag is the zero based ortho diagonal ("left" diagonals),
      idx is the zero based index into orth_diag */
   return { orth_diag - idx, idx};
 }
@@ -127,7 +139,7 @@ __global__ void evalZ_kernel(int diagIdx,
   REAL_t dmin;
   REAL_t dist;
 
-  // case 1
+  /* case 1, Keep Both */
   htrans = fabs( (REAL_t)(TA[row-1] - TB[col-1]));
   if(col>1 && row>1){
     htrans += fabs((REAL_t)(TA[row-2] - TB[col-2]));
@@ -135,41 +147,46 @@ __global__ void evalZ_kernel(int diagIdx,
   //DBG printf("DP_diag_lag_2[tidDrm1cm1= %ld] = %f\n", tidDrm1cm1, DP_diag_lag_2[tidDrm1cm1]);
   dmin = DP_diag_lag_2[tidDrm1cm1] + d + nu * htrans;
 
-  // case 2
+  /* case 2, Delete point in A */
   if(row>1)
     htrans = ((REAL_t)(TA[row-1] - TA[row-2]));
   else htrans = (REAL_t)TA[row-1];
   dist = DA[row] + DP_diag_lag[tidDrm1] + lambda + nu * htrans;
-  // check if we need to assign new min
+  /* check if we need to assign new min */
   dmin = fmin(dmin, dist);
 
-  // case 3
+  /* case 3, Delete Point in B */
   if(col>1)
     htrans = ((REAL_t)(TB[col-1] - TB[col-2]));
   else htrans = (REAL_t)TB[col-1];
   dist = DB[col] + DP_diag_lag[tidDcm1] + lambda + nu * htrans;
-  // check if we need to assign new min
+  /* check if we need to assign new min */
   dmin = fmin(dmin, dist);
 
-  // assign result to dynamic program matrix
+  // assign minimal result to dynamic program matrix
   DP_diag[tid] = dmin;
-  //DBG DP_diag[tid] = diagIdx;
+  /*
+    Note, the following line is a handy way to debug the procession
+    across the DP matrix (in conjuction with DEBUG prints).
+    //DBG DP_diag[tid] = diagIdx;
+  */
 
 }
 
 
-static void evalZ(REAL_t DP_diag[],
-                  const REAL_t* __restrict__ A, const REAL_t* __restrict__ DA, int nA, const REAL_t* __restrict__ TA,
-                  const REAL_t* __restrict__ B, const REAL_t* __restrict__ DB, int nB, const REAL_t* __restrict__ TB,
-                  REAL_t nu, int degree, REAL_t lambda){
+static REAL_t evalZ(const REAL_t* __restrict__ A, const REAL_t* __restrict__ DA, int nA, const REAL_t* __restrict__ TA,
+                    const REAL_t* __restrict__ B, const REAL_t* __restrict__ DB, int nB, const REAL_t* __restrict__ TB,
+                    REAL_t nu, int degree, REAL_t lambda){
   const int n = (nA+1) + (nB+1) -1;
   dim3 block_dim(32); // note this particular var might be sensitive to tuning and architectures...
   int diagIdx;
 
   REAL_t* tmp_ptr=NULL;
+  REAL_t* DP_diag;
   REAL_t* DP_diag_lag;
   REAL_t* DP_diag_lag_2;
   const size_t sz = n * sizeof(*DP_diag_lag);
+  HANDLE_ERROR(cudaMalloc(&DP_diag, sz));
   HANDLE_ERROR(cudaMalloc(&DP_diag_lag, sz));
   HANDLE_ERROR(cudaMalloc(&DP_diag_lag_2, sz));
 
@@ -187,6 +204,7 @@ static void evalZ(REAL_t DP_diag[],
     HANDLE_ERROR(cudaPeekAtLastError());
 
 
+#ifdef DEBUG
     /*
     // DBG
     REAL_t* tmp = (REAL_t*)calloc(n, sizeof(REAL_t));
@@ -228,19 +246,17 @@ static void evalZ(REAL_t DP_diag[],
     free(tmp);
     // DBG
     */
+#endif
 
   }
 
-  int r = n;
-  while (r%3 !=0){
-    // we need to cycle our pointers...
-    tmp_ptr = DP_diag_lag_2;
-    DP_diag_lag_2 = DP_diag_lag;
-    DP_diag_lag = DP_diag;
-    DP_diag = tmp_ptr;
-    HANDLE_ERROR(cudaMemcpy(DP_diag, DP_diag_lag, sz, cudaMemcpyDeviceToDevice));
-    r++;
-  }
+  REAL_t result;
+  HANDLE_ERROR(cudaMemcpy(&result, &DP_diag[map_rc_to_diag(nA, nB).idx], sizeof(*DP_diag), cudaMemcpyDeviceToHost));
+
+  HANDLE_ERROR(cudaFree(DP_diag));
+  HANDLE_ERROR(cudaFree(DP_diag_lag));
+  HANDLE_ERROR(cudaFree(DP_diag_lag_2));
+  return result;
 }
 
 
@@ -248,8 +264,7 @@ static void evalZ(REAL_t DP_diag[],
 extern "C" {
 #endif
 void twed_malloc_dev(int nA, REAL_t **A_dev, REAL_t  **TA_dev,
-                     int nB, REAL_t **B_dev, REAL_t  **TB_dev,
-                     REAL_t **DP_dev){
+                     int nB, REAL_t **B_dev, REAL_t  **TB_dev){
   //malloc on gpu and copy
   const size_t sza = (nA+1) * sizeof(**A_dev);
   HANDLE_ERROR(cudaMalloc(A_dev, sza));
@@ -258,9 +273,6 @@ void twed_malloc_dev(int nA, REAL_t **A_dev, REAL_t  **TA_dev,
   const size_t szb = (nB+1) * sizeof(**B_dev);
   HANDLE_ERROR(cudaMalloc(B_dev, szb));
   HANDLE_ERROR(cudaMalloc(TB_dev, szb));
-
-  const size_t sz = ((nA+1) + (nB+1) -1) * sizeof(**DP_dev);
-  HANDLE_ERROR(cudaMalloc(DP_dev, sz));
 }
 #ifdef __cplusplus
 }
@@ -271,14 +283,12 @@ void twed_malloc_dev(int nA, REAL_t **A_dev, REAL_t  **TA_dev,
 extern "C" {
 #endif
 void twed_free_dev(REAL_t *A_dev, REAL_t  *TA_dev,
-                   REAL_t *B_dev, REAL_t  *TB_dev,
-                   REAL_t *DP_dev){
+                   REAL_t *B_dev, REAL_t  *TB_dev){
   //cleanup
   HANDLE_ERROR(cudaFree(A_dev));
   HANDLE_ERROR(cudaFree(TA_dev));
   HANDLE_ERROR(cudaFree(B_dev));
   HANDLE_ERROR(cudaFree(TB_dev));
-  HANDLE_ERROR(cudaFree(DP_dev));
 }
 #ifdef __cplusplus
 }
@@ -307,8 +317,7 @@ extern "C" {
 #endif
 REAL_t twed_dev(REAL_t A_dev[], int nA, REAL_t TA_dev[],
                 REAL_t B_dev[], int nB, REAL_t TB_dev[],
-                REAL_t nu, REAL_t lambda, int degree,
-                REAL_t DP_dev[]){
+                REAL_t nu, REAL_t lambda, int degree){
   REAL_t *DA_dev, *DB_dev;
   REAL_t result;
 
@@ -327,7 +336,6 @@ REAL_t twed_dev(REAL_t A_dev[], int nA, REAL_t TA_dev[],
   HANDLE_ERROR(cudaMalloc(&DA_dev, sza));
   HANDLE_ERROR(cudaMalloc(&DB_dev, szb));
 
-
   // compute initial distance A
   block_dim.x = 256;
   grid_dim.x = (nA + block_dim.x - 1) / block_dim.x;
@@ -345,10 +353,7 @@ REAL_t twed_dev(REAL_t A_dev[], int nA, REAL_t TA_dev[],
   // iteratively update the DP matrix
   //   we process diagonals moving the diagonal from upper left to lower right,
   //         each element of a diag can is done in parallel.
-  evalZ(DP_dev, A_dev, DA_dev, nA, TA_dev, B_dev, DB_dev, nB, TB_dev, nu, degree, lambda);
-
-  // the algo result should be the final distance stored in DP
-  HANDLE_ERROR(cudaMemcpy(&result, &DP_dev[map_rc_to_diag(nA, nB).idx], sizeof(result), cudaMemcpyDeviceToHost));
+  result = evalZ(A_dev, DA_dev, nA, TA_dev, B_dev, DB_dev, nB, TB_dev, nu, degree, lambda);
 
   HANDLE_ERROR(cudaFree(DA_dev));
   HANDLE_ERROR(cudaFree(DB_dev));
@@ -369,17 +374,14 @@ extern "C" {
 #endif
 REAL_t twed(REAL_t A[], int nA, REAL_t TA[],
             REAL_t B[], int nB, REAL_t TB[],
-            REAL_t nu, REAL_t lambda, int degree,
-            REAL_t* DP){
+            REAL_t nu, REAL_t lambda, int degree){
   REAL_t *A_dev, *TA_dev;
   REAL_t *B_dev, *TB_dev;
-  REAL_t *DP_dev;
   REAL_t result;
 
   // malloc gpu arrays
   twed_malloc_dev(nA, &A_dev, &TA_dev,
-              nB, &B_dev, &TB_dev,
-              &DP_dev);
+                  nB, &B_dev, &TB_dev);
 
   // copy inputs to device
   twed_copy_to_dev(nA, A, A_dev, TA, TA_dev,
@@ -388,20 +390,11 @@ REAL_t twed(REAL_t A[], int nA, REAL_t TA[],
   // compute TWED on device
   result = twed_dev(A_dev, nA, TA_dev,
                     B_dev, nB, TB_dev,
-                    nu, lambda, degree,
-                    DP_dev);
-
-  /// this isnt write for diagZ
-  // // optionally copy back DP matrix
-  // if(DP != NULL){
-  //   const size_t sz = (nA+1) * (nB+1) * sizeof(*DP_dev);
-  //   HANDLE_ERROR(cudaMemcpy(&result, DP_dev, sz, cudaMemcpyDeviceToHost));
-  // }
+                    nu, lambda, degree);
 
   // free device memory
   twed_free_dev(A_dev, TA_dev,
-            B_dev, TB_dev,
-            DP_dev);
+                B_dev, TB_dev);
 
   return result;
 }

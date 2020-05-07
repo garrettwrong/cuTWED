@@ -109,7 +109,7 @@ void CTWED(double ta[], int *la, double tsa[], double tb[], int *lb, double tsb[
                 D[i][j]=*dist;
                 //printf("D[ %d ][ %d ] = %f\n", i, j, *dist);
                 }
-        }// for i
+        } // for i
         
         // border of the cost matrix initialization
         D[0][0]=0;

@@ -19,13 +19,8 @@ int main(int argc, char** argv){
   REAL_t lambda = 1.;
   REAL_t dist = -1;
 
-  dist = twed(A, nA, TA, B, nB, TB, nu, lambda, degree, NULL);
+  dist = twed(A, nA, TA, B, nB, TB, nu, lambda, degree);
 
-  /* to return DP for inspection
-  REAL_t* DP;
-  DP = (REAL_t*)calloc((nA+1)*(nB+1), sizeof(*DP));
-  dist = twed(A, nA, TA, B, nB, TB, nu, lambda, degree, DP);
-  */
-  printf("ctwed dist: %lf\n", dist);
+  printf("cuTWED dist: %lf\n", dist);
 
 }
