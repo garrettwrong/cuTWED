@@ -14,10 +14,9 @@ int main(int argc, char** argv){
 
   int degree = 2;
 
-  /* REAL_t is either double or float */
-  REAL_t nu = 1.;
-  REAL_t lambda = 1.;
-  REAL_t dist = -1;
+  double nu = 1.;
+  double lambda = 1.;
+  double dist = -1;
 
   dist = twed(A, nA, TA, B, nB, TB, nu, lambda, degree);
 

@@ -26,11 +26,6 @@ except OSError as e:
     print("Ensure you have added 'libcuTWED.so' somewhere in your LD_LIBRARY_PATH")
     raise e
 
-try:
-    _libcuTWED_32 = ctypes.CDLL('libcuTWED_32.so')
-except OSError as e:
-    print("Ensure you have added 'libcuTWED_32.so' somewhere in your LD_LIBRARY_PATH")
-    raise e
 
 _twed = _libcuTWED.twed
 _twed.restype = ctypes.c_double
@@ -44,9 +39,9 @@ _twed.argtypes = [np.ctypeslib.ndpointer(dtype=np.float64, ndim=1, flags='C_CONT
                   ctypes.c_double,
                   ctypes.c_int]
 
-_twed_32 = _libcuTWED_32.twed
-_twed_32.restype = ctypes.c_float
-_twed_32.argtypes = [np.ctypeslib.ndpointer(dtype=np.float32, ndim=1, flags='C_CONTIGUOUS'),
+_twedf = _libcuTWED.twedf
+_twedf.restype = ctypes.c_float
+_twedf.argtypes = [np.ctypeslib.ndpointer(dtype=np.float32, ndim=1, flags='C_CONTIGUOUS'),
                      ctypes.c_int,
                      np.ctypeslib.ndpointer(dtype=np.float32, ndim=1, flags='C_CONTIGUOUS'),
                      np.ctypeslib.ndpointer(dtype=np.float32, ndim=1, flags='C_CONTIGUOUS'),
@@ -68,9 +63,9 @@ _twed_dev.argtypes = [ctypes.c_void_p,
                       ctypes.c_double,
                       ctypes.c_int]
 
-_twed_dev_32 = _libcuTWED_32.twed_dev
-_twed_dev_32.restype = ctypes.c_float
-_twed_dev_32.argtypes = [ctypes.c_void_p,
+_twed_devf = _libcuTWED.twed_devf
+_twed_devf.restype = ctypes.c_float
+_twed_devf.argtypes = [ctypes.c_void_p,
                          ctypes.c_int,
                          ctypes.c_void_p,
                          ctypes.c_void_p,
@@ -100,7 +95,7 @@ def twed(A, TA, B, TB, nu, lamb, degree):
     if A.dtype == np.float64:
         func = _twed
     elif A.dtype == np.float32:
-        func = _twed_32
+        func = _twedf
     else:
         raise RuntimeError("Expected inputs to be np.float32 or np.float64")
     
@@ -130,7 +125,7 @@ def twed_dev(A, TA, B, TB, nu, lamb, degree):
     if A.dtype == np.float64:
         func = _twed_dev
     elif A.dtype == np.float32:
-        func = _twed_dev_32
+        func = _twed_devf
     else:
         raise RuntimeError("Expected inputs to be np.float32 or np.float64")
 
