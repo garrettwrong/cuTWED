@@ -19,7 +19,7 @@ lib: libcuTWED.so
 test.x: test.cu libcuTWED.so reference_implementation/reference_arrays.h
 	$(NVCC) $(NV_GEN) -g -O3 -o $@ $< libcuTWED.so
 
-libcuTWED.so: cuTWED.cu cuTWED.h
+libcuTWED.so: cuTWED.cu cuTWED.h cuTWED_core.h
 	$(NVCC) $(NV_GEN) -g -O3 --shared --compiler-options "-fPIC -Wall -Wextra" -o $@ $<
 
 twed.x: reference_implementation/twed.c reference_implementation/reference_arrays.h

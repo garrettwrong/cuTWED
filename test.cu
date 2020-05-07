@@ -17,8 +17,9 @@ int main(int argc, char** argv){
   double nu = 1.;
   double lambda = 1.;
   double dist = -1;
+  int dim = 1;
 
-  dist = twed(A, nA, TA, B, nB, TB, nu, lambda, degree);
+  dist = twed(A, nA, TA, B, nB, TB, nu, lambda, degree, dim);
 
   printf("cuTWED dist: %lf\n", dist);
 

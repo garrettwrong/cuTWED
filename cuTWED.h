@@ -21,6 +21,7 @@
 extern "C" { 
 #endif
 
+  
 
   /*
     A, B are arrays of time series values.
@@ -30,11 +31,11 @@ extern "C" {
   */
   double twed(double A[], int nA, double TA[],
               double B[], int nB, double TB[],
-              double nu, double lambda, int degree);
+              double nu, double lambda, int degree, int dim);
 
   float twedf(float A[], int nA, float TA[],
               float B[], int nB, float TB[],
-              float nu, float lambda, int degree);
+              float nu, float lambda, int degree, int dim);
 
 
   /*
@@ -43,11 +44,11 @@ extern "C" {
   */
   double twed_dev(double A_dev[], int nA, double TA_dev[],
                   double B_dev[], int nB, double TB_dev[],
-                  double nu, double lambda, int degree);
+                  double nu, double lambda, int degree, int dim);
 
   float twed_devf(float A_dev[], int nA, float TA_dev[],
                   float B_dev[], int nB, float TB_dev[],
-                  float nu, float lambda, int degree);
+                  float nu, float lambda, int degree, int dim);
 
 
   /*

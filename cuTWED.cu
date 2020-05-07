@@ -26,6 +26,15 @@
 /* #define DEBUG */
 
 
+/* Note this DIMENSION_CUTOVER is easily changed with some care.
+   But you want to stay in fast memory...
+   Small values can live in registers...
+   Medium, __shared__...
+   Absurd, global...
+*/
+static const int DIMENSION_CUTOVER = 32;
+
+
 /*
   CUDA Utility
 */
@@ -65,6 +74,10 @@ static __inline__ __host__ __device__ diagIdx_t map_rc_to_diag(int row, int col)
   /* orth_diag is the zero based ortho diagonal,
      idx is the zero based index into orth_diag */
   return {row+col, col};
+}
+
+static __inline__ __device__ size_t dim_offset(size_t idx, int dim){
+  return dim*idx;
 }
 
 /*
