@@ -12,11 +12,14 @@ NV_GEN= -arch=sm_75 \
  -gencode=arch=compute_75,code=sm_75 \
  -gencode=arch=compute_75,code=compute_75
 
-all: lib test.x twed.x
+all: lib test.x testf.x twed.x
 
 lib: libcuTWED.so
 
 test.x: test.cu libcuTWED.so reference_implementation/reference_arrays.h
+	$(NVCC) $(NV_GEN) -g -O3 -o $@ $< libcuTWED.so
+
+testf.x: testf.cu libcuTWED.so reference_implementation/reference_arrays.h
 	$(NVCC) $(NV_GEN) -g -O3 -o $@ $< libcuTWED.so
 
 libcuTWED.so: cuTWED.cu cuTWED.h cuTWED_core.h
