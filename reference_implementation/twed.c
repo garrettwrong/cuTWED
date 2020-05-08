@@ -88,7 +88,8 @@ void CTWED(double ta[], int *la, double tsa[], double tb[], int *lb, double tsb[
                 }
                 else distj1+=pow(fabs(tb[j-1]),deg);
                 
-                Dj1[j]=distj1;
+                //Dj1[j]=distj1;
+                Dj1[j]=sqrt(distj1);  // NOTE original author did not sqrt
                 //printf("Dj1[ %d ] = %f\n", j, distj1);
         }
         
@@ -98,7 +99,8 @@ void CTWED(double ta[], int *la, double tsa[], double tb[], int *lb, double tsb[
                         disti1+=pow(fabs(ta[i-2]-ta[i-1]),deg);
                 else disti1+=pow(fabs(ta[i-1]),deg);
 
-                Di1[i]=disti1;
+                //Di1[i]=disti1;
+                Di1[i]=sqrt(disti1); // NOTE original author did not sqrt
   
                 for(j=1; j<=c; j++) {
                         (*dist)=0;

@@ -14,7 +14,7 @@ and was used to compare results. There is also a
 The original TWED algorithm is `O(n^2)` in time and space.
 This algorithm is roughly `O(n * n/p)` in time for p (CUDA) cores.
 Most importantly, cuTWED is linear in memory,
-requiring storage for roughly `6*nA + 6*nB` elements.
+requiring storage for roughly `3*nA + 3*nB` elements.
 
 In the process of understanding the dynamic program data dependencies in order to parallelize
 towards the CUDA architecture, I devised a method with improved memory access patterns
@@ -41,7 +41,7 @@ Some speed comparisons and a more formal explanation will follow.
 ### Requirements
 
 You will need NVCC and a CUDA capable card that can fit your problem.
-The problem is roughly 12*n in memory for time series of length n.
+The problem is roughly 6*n elements in memory for time series of length n.
 
 ### Building
 

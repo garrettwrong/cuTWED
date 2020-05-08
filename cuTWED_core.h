@@ -34,7 +34,7 @@ __device__ REAL_t lpnorm(const int p,
   }
 
   /* this is not strictly necessary for our purposes... */
-  /* s = pow(s, 1./pf); */ 
+  s = pow(s, 1./pf); 
 
   return s;      
 }
