@@ -69,15 +69,15 @@ _twed_dev.argtypes = [ctypes.c_void_p,
 _twed_devf = _libcuTWED.twed_devf
 _twed_devf.restype = ctypes.c_float
 _twed_devf.argtypes = [ctypes.c_void_p,
-                         ctypes.c_int,
-                         ctypes.c_void_p,
-                         ctypes.c_void_p,
-                         ctypes.c_int,
-                         ctypes.c_void_p,
-                         ctypes.c_float,
-                         ctypes.c_float,
                        ctypes.c_int,
-                         ctypes.c_int]
+                       ctypes.c_void_p,
+                       ctypes.c_void_p,
+                       ctypes.c_int,
+                       ctypes.c_void_p,
+                       ctypes.c_float,
+                       ctypes.c_float,
+                       ctypes.c_int,
+                       ctypes.c_int]
 
 
 def twed(A, TA, B, TB, nu, lamb, degree=2):

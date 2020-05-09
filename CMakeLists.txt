@@ -42,3 +42,5 @@ add_custom_target(
 install(TARGETS cuTWED DESTINATION lib)
 install(FILES src/cuTWED.h DESTINATION include)
 install(FILES src/cuTWED_core.h DESTINATION include)
+
+message(WARNING "Users will need to ensure $PREFIX/lib is in their ld path")
