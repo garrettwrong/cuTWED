@@ -25,7 +25,7 @@ cuda_add_executable(twed.x reference_implementation/twed.c)
 ## I don't actually use this atm... but its there...
 add_custom_command(
   OUTPUT cuTWED.h.i
-  COMMAND "${CMAKE_C_COMPILER}" -E "${CMAKE_CURRENT_SOURCE_DIR}/src/cuTWED.h" -o "${CMAKE_CURRENT_BINARY_DIR}/cuTWED.h.i"
+  COMMAND "${CMAKE_C_COMPILER}" -E "${CMAKE_CURRENT_SOURCE_DIR}/src/cuTWED.h" -o "${CMAKE_CURRENT_SOURCE_DIR}/cuTWED/cuTWED.h.i"
   MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/src/cuTWED.h"
   COMMENT "Prepocessing cuTWED.h"
   VERBATIM
