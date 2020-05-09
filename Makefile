@@ -12,21 +12,18 @@ NV_GEN= -arch=sm_75 \
  -gencode=arch=compute_75,code=sm_75 \
  -gencode=arch=compute_75,code=compute_75
 
-all: libs test.x test_32.x twed.x
+all: lib test.x testf.x twed.x
 
-libs: libcuTWED.so libcuTWED_32.so 
+lib: libcuTWED.so
 
 test.x: test.cu libcuTWED.so reference_implementation/reference_arrays.h
 	$(NVCC) $(NV_GEN) -g -O3 -o $@ $< libcuTWED.so
 
-test_32.x: test.cu libcuTWED_32.so reference_implementation/reference_arrays.h
-	$(NVCC) $(NV_GEN) -g -O3 -o $@ -DREAL_t=float $< libcuTWED_32.so
+testf.x: testf.cu libcuTWED.so reference_implementation/reference_arrays.h
+	$(NVCC) $(NV_GEN) -g -O3 -o $@ $< libcuTWED.so
 
-libcuTWED.so: cuTWED.cu cuTWED.h
+libcuTWED.so: cuTWED.cu cuTWED.h cuTWED_core.h
 	$(NVCC) $(NV_GEN) -g -O3 --shared --compiler-options "-fPIC -Wall -Wextra" -o $@ $<
-
-libcuTWED_32.so: cuTWED.cu cuTWED.h
-	$(NVCC) $(NV_GEN) -g -O3 --shared --compiler-options "-fPIC -Wall -Wextra" -o $@ -DREAL_t=float $<
 
 twed.x: reference_implementation/twed.c reference_implementation/reference_arrays.h
 	$(CC) -g -O3 -Wall -o $@ $< -lm
@@ -36,5 +33,6 @@ clean:
 	rm -f *.o
 	rm -f *.x
 	rm -rf *.dSYM
+.PHONY: all
 .PHONY: clean
-.PHONY: libs
+.PHONY: lib

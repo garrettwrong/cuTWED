@@ -17,14 +17,11 @@
 #ifndef __cuTWED_H_
 #define __cuTWED_H_
 
-/* CPP Macro for floating point type */
-#ifndef REAL_t
-#define REAL_t double
-#endif
-
 #ifdef __cplusplus  
 extern "C" { 
 #endif
+
+  
 
   /*
     A, B are arrays of time series values.
@@ -32,68 +29,62 @@ extern "C" {
     nA, nB are number of elements in A and B
     nu, lambda, and degree are algo params.
   */
-REAL_t twed(REAL_t A[], int nA, REAL_t TA[],
-            REAL_t B[], int nB, REAL_t TB[],
-            REAL_t nu, REAL_t lambda, int degree, REAL_t* DP);
-#ifdef __cplusplus  
-}
-#endif 
+  double twed(double A[], int nA, double TA[],
+              double B[], int nB, double TB[],
+              double nu, double lambda, int degree, int dim);
+
+  float twedf(float A[], int nA, float TA[],
+              float B[], int nB, float TB[],
+              float nu, float lambda, int degree, int dim);
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
   /*
     Same a twed, just expect CU (gpu) arrays,
     You may use twed_malloc_dev if you want to right logic to reuse gpu memory etc.
-   */
-REAL_t twed_dev(REAL_t A_dev[], int nA, REAL_t TA_dev[],
-                REAL_t B_dev[], int nB, REAL_t TB_dev[],
-                REAL_t nu, REAL_t lambda, int degree,
-                REAL_t DP_dev[]);
-#ifdef __cplusplus  
-}
-#endif 
+  */
+  double twed_dev(double A_dev[], int nA, double TA_dev[],
+                  double B_dev[], int nB, double TB_dev[],
+                  double nu, double lambda, int degree, int dim);
+
+  float twed_devf(float A_dev[], int nA, float TA_dev[],
+                  float B_dev[], int nB, float TB_dev[],
+                  float nu, float lambda, int degree, int dim);
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-void twed_malloc_dev(int nA, REAL_t **A_dev, REAL_t  **TA_dev,
-                     int nB, REAL_t **B_dev, REAL_t  **TB_dev,
-                     REAL_t **DP_dev);
-#ifdef __cplusplus
-}
-#endif
+  /*
+    Mallocs memory on device, approximately (6*nA + 6*nB) * sizeof(REAL_t)
+  */
+  void twed_malloc_dev(int nA, double **A_dev, double  **TA_dev,
+                       int nB, double **B_dev, double  **TB_dev);
+
+  void twed_malloc_devf(int nA, float **A_dev, float  **TA_dev,
+                        int nB, float **B_dev, float  **TB_dev);
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+  
   /*
     Frees memory malloc'd in twed_malloc_dev
-   */
-void twed_free_dev(REAL_t *A_dev, REAL_t  *TA_dev,
-                   REAL_t *B_dev, REAL_t  *TB_dev,
-                   REAL_t *DP_dev);
-#ifdef __cplusplus
-}
-#endif
+  */
+  void twed_free_dev(double *A_dev, double  *TA_dev,
+                     double *B_dev, double  *TB_dev);
 
+  void twed_free_devf(float *A_dev, float  *TA_dev,
+                      float *B_dev, float  *TB_dev);
 
-#ifdef __cplusplus
-extern "C" {
-#endif
   /*
     Copies data from host to device. You would only use this function if you
     are writing logic to resuse gpu memory.
-   */
-void twed_copy_to_dev(int nA, REAL_t A[], REAL_t A_dev[], REAL_t TA[], REAL_t TA_dev[],
-                      int nB, REAL_t B[], REAL_t B_dev[], REAL_t TB[], REAL_t TB_dev[]);
+  */
+  void twed_copy_to_dev(int nA, double A[], double A_dev[], double TA[], double TA_dev[],
+                        int nB, double B[], double B_dev[], double TB[], double TB_dev[]);
+
+  void twed_copy_to_devf(int nA, float A[], float A_dev[], float TA[], float TA_dev[],
+                         int nB, float B[], float B_dev[], float TB[], float TB_dev[]);
+
+
 #ifdef __cplusplus
 }
 #endif
-
   
 
 #endif

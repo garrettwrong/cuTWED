@@ -8,19 +8,20 @@
 
 #include "cuTWED.h"
 
+#define REAL_t float
 #include "reference_implementation/reference_arrays.h"
 
 int main(int argc, char** argv){
 
   int degree = 2;
 
-  double nu = 1.;
-  double lambda = 1.;
-  double dist = -1;
+  float nu = 1.;
+  float lambda = 1.;
+  float dist = -1;
   int dim = 1;
 
-  dist = twed(A, nA, TA, B, nB, TB, nu, lambda, degree, dim);
+  dist = twedf(A, nA, TA, B, nB, TB, nu, lambda, degree, dim);
 
-  printf("cuTWED dist: %lf\n", dist);
+  printf("cuTWED dist: %f\n", dist);
 
 }
