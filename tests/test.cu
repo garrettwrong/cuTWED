@@ -8,7 +8,8 @@
 
 #include "cuTWED.h"
 
-#include "reference_implementation/reference_arrays.h"
+/* this just loads some static arrays */
+#include "../reference_implementation/reference_arrays.h"
 
 int main(int argc, char** argv){
 

@@ -13,10 +13,10 @@ set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -arch=sm_75 -gencode=arch=compute_30,code
 include_directories(src)
 cuda_add_library(cuTWED SHARED src/cuTWED.cu)
 
-cuda_add_executable(test.x test.cu)
+cuda_add_executable(test.x tests/test.cu)
 target_link_libraries(test.x cuTWED )
 
-cuda_add_executable(testf.x testf.cu)
+cuda_add_executable(testf.x tests/testf.cu)
 target_link_libraries(testf.x cuTWED )
 
 cuda_add_executable(twed.x reference_implementation/twed.c)

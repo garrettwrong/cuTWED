@@ -18,7 +18,6 @@ along with cuTWED.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 import numpy as np
-import ctypes
 
 import pycuda.autoinit
 import pycuda.gpuarray as gpuarray
@@ -27,7 +26,7 @@ from _cuTWED import ffi, lib
 
 def twed(A, TA, B, TB, nu, lamb, degree=2):
     """
-    Invokes CUDA based twed using ctypes wrapper.
+    Invokes CUDA based twed using cffi wrapper.
 
     A, B  : Arrays of time series values.
     TA, TB: Arrays of corresponding time series timestamps.

@@ -28,8 +28,8 @@ def read(*names, **kwargs):
 # Enable code coverage for C code: we can't use CFLAGS=-coverage in tox.ini, since that may mess with compiling
 # dependencies (e.g. numpy). Therefore we set SETUPPY_CFLAGS=-coverage in tox.ini and copy it to CFLAGS here (after
 # deps have been safely installed).
-# if 'TOXENV' in os.environ and 'SETUPPY_CFLAGS' in os.environ:
-#     os.environ['CFLAGS'] = os.environ['SETUPPY_CFLAGS']
+if 'TOXENV' in os.environ and 'SETUPPY_CFLAGS' in os.environ:
+    os.environ['CFLAGS'] = os.environ['SETUPPY_CFLAGS']
 
 setup(
     name='cuTWED',
@@ -70,6 +70,7 @@ setup(
         # 'Programming Language :: Python :: Implementation :: Stackless',
         'Topic :: Utilities',
     ],
+    tests_require=['pytest'],
     project_urls={
         'Documentation': 'https://cuTWED.readthedocs.io/',
         'Changelog': 'https://cuTWED.readthedocs.io/en/latest/changelog.html',
@@ -92,6 +93,7 @@ setup(
     # pyproject.toml does not support requirements only for some build actions,
     # but we can do it in setup.py.
     setup_requires=[
+        'pytest-runner',
         'cffi>=1.0.0'
     ] if any(i.startswith('build') or i.startswith('bdist') for i in sys.argv) else [
     ],
