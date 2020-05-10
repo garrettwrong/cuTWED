@@ -33,11 +33,11 @@ with open(os.path.join(os.path.dirname(__file__), "cuTWED.h.i")) as fh:
 # to make the declarated functions, types and globals available,
 # so it is often just the "#include".
 ffibuilder.set_source("_cuTWED",
-"""
+                      """
      #include "cuTWED.h.i"   // the C header of the library
-""",
+                      """,
                       libraries=['cuTWED'],   # library name, for the linker
-)
+                      )
 
 if __name__ == "__main__":
     ffibuilder.compile(verbose=True)

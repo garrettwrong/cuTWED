@@ -31,6 +31,7 @@ degree = 2
 
 reference_result = 61445.496235
 
+
 def test_large_call():
     """ Test calling twed """
     # Call TWED
@@ -39,6 +40,7 @@ def test_large_call():
     print('Python cuTWED distance: {:f}'.format(dist))
 
     assert np.allclose(dist, reference_result)
+
 
 def test_large_call_float():
     """ Test the same call in single precision by feeding different types. """
@@ -50,7 +52,8 @@ def test_large_call_float():
     print('Python cuTWED distance (single precision): {:f}'.format(dist))
 
     assert np.allclose(dist, reference_result)
-    
+
+
 if __name__ == "__main__":
     test_large_call()
     test_large_call_float()

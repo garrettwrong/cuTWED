@@ -19,10 +19,8 @@ along with cuTWED.  If not, see <https://www.gnu.org/licenses/>.
 
 import numpy as np
 
-import pycuda.autoinit
-import pycuda.gpuarray as gpuarray
-
 from _cuTWED import ffi, lib
+
 
 def twed(A, TA, B, TB, nu, lamb, degree=2):
     """
@@ -47,24 +45,31 @@ def twed(A, TA, B, TB, nu, lamb, degree=2):
     nA = A.shape[0]
     nB = B.shape[0]
     dim = A.shape[1]
-    
+
     assert dim == B.shape[1], "A and B can be different length," \
         "but should have same 'dim'."
     assert nA == len(TA)
     assert nB == len(TB)
-    assert degree>0
-    assert all([x.dtype==A.dtype for x in [A, TA, B, TB]]) # Dtypes should match
+    assert degree > 0
+    assert all([x.dtype == A.dtype for x in [A, TA, B, TB]])  # Dtypes should match
 
     if A.dtype == np.float64:
         func = lib.twed
-        caster = lambda x: ffi.cast("double *", x.ctypes.data)
+
+        def caster(x):
+            return ffi.cast("double *", x.ctypes.data)
+
     elif A.dtype == np.float32:
         func = lib.twedf
-        caster = lambda x: ffi.cast("float *", x.ctypes.data)
+
+        def caster(x):
+            return ffi.cast("float *", x.ctypes.data)
+
     else:
         raise RuntimeError("Expected inputs to be np.float32 or np.float64")
-    
+
     return func(caster(A), nA, caster(TA), caster(B), nB, caster(TB), nu, lamb, degree, dim)
+
 
 def twed_dev(A, TA, B, TB, nu, lamb, degree=2):
     """
@@ -75,7 +80,7 @@ def twed_dev(A, TA, B, TB, nu, lamb, degree=2):
     degree: Power used in the Lp norm, default is 2.
     nu, lamb: algo parameters.
     """
-    
+
     if A.ndim == 1:
         A = A.reshape((A.shape[0], 1))
     elif A.ndim != 2:
@@ -85,7 +90,7 @@ def twed_dev(A, TA, B, TB, nu, lamb, degree=2):
         B = B.reshape((B.shape[0], 1))
     elif B.ndim != 2:
         raise RuntimeError("Input B should be 1D, or 2d (Time x dim) array.")
-    
+
     nA = A.shape[0]
     nB = B.shape[0]
     dim = A.shape[1]
@@ -94,15 +99,21 @@ def twed_dev(A, TA, B, TB, nu, lamb, degree=2):
         "but should have same 'dim'."
     assert nA == len(TA)
     assert nB == len(TB)
-    assert degree>0
-    assert all([x.dtype==A.dtype for x in [A, TA, B, TB]]) # Dtypes should match
+    assert degree > 0
+    assert all([x.dtype == A.dtype for x in [A, TA, B, TB]])  # Dtypes should match
 
     if A.dtype == np.float64:
         func = lib.twed_dev
-        caster = lambda x: ffi.cast("double *", x.gpudata)
+
+        def caster(x):
+            return ffi.cast("double *", x.gpudata)
+
     elif A.dtype == np.float32:
         func = lib.twed_devf
-        caster = lambda x: ffi.cast("float *", x.gpudata)
+
+        def caster(x):
+            return ffi.cast("float *", x.gpudata)
+
     else:
         raise RuntimeError("Expected inputs to be np.float32 or np.float64")
 

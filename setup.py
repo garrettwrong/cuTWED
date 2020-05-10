@@ -5,7 +5,6 @@ from __future__ import print_function
 
 import io
 import os
-import re
 import sys
 from glob import glob
 from os.path import basename
@@ -42,7 +41,6 @@ setup(
     packages=find_packages('cuTWED'),
     package_dir={'': 'cuTWED'},
     py_modules=[splitext(basename(path))[0] for path in glob('cuTWED/*.py')],
-    #py_modules=['cuTWED'],
     include_package_data=True,
     zip_safe=False,
     classifiers=[
@@ -51,9 +49,9 @@ setup(
         'Intended Audience :: Developers',
         'Operating System :: Unix',
         'Operating System :: POSIX',
-        'Operating System :: Microsoft :: Windows',
+        # 'Operating System :: Microsoft :: Windows',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
+        # 'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
@@ -83,9 +81,9 @@ setup(
         'pycuda',
     ],
     extras_require={
-        # eg:
-        #   'rst': ['docutils>=0.11'],
-        #   ':python_version=="2.6"': ['argparse'],
+        'rst': ['docutils>=0.11'],
+        'tox': ['tox'],
+        # ':python_version=="2.6"': ['argparse'],
     },
     # We only require CFFI when compiling.
     # pyproject.toml does not support requirements only for some build actions,

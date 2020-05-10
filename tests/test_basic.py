@@ -4,6 +4,7 @@ Demonstates basic cuTWED usage
 
 Copyright 2020 Garrett Wright, Gestalt Group LLC
 """
+
 import numpy as np
 from numpy.random import RandomState
 
@@ -30,6 +31,7 @@ degree = 2
 
 reference_result = 54.827250
 
+
 def test_basic_call():
     """ Test calling twed """
 
@@ -38,6 +40,7 @@ def test_basic_call():
     print('Python cuTWED distance: {:f}'.format(dist))
 
     assert np.allclose(dist, reference_result)
+
 
 def test_basic_call_float():
     """ Test the same call in single precision by feeding different types. """
@@ -49,6 +52,7 @@ def test_basic_call_float():
     print('Python cuTWED distance (single precision): {:f}'.format(dist))
 
     assert np.allclose(dist, reference_result)
+
 
 if __name__ == "__main__":
     test_basic_call()
