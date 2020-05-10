@@ -18,7 +18,9 @@ along with cuTWED.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 import os
+
 from cffi import FFI
+
 ffibuilder = FFI()
 
 # cdef() expects a single string declaring the C types, functions and

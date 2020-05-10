@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+
 import numpy as np
 from numpy.random import RandomState
 

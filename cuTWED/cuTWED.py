@@ -18,8 +18,8 @@ along with cuTWED.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 import numpy as np
-
-from _cuTWED import ffi, lib
+from _cuTWED import ffi
+from _cuTWED import lib
 
 
 def twed(A, TA, B, TB, nu, lamb, degree=2):
