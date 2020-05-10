@@ -35,10 +35,7 @@ setup(
     name='cuTWED',
     version='0.2.0',
     description='A linear memory CUDA Time Warp Edit Distance algorithm.',
-    long_description='%s\n%s' % (
-        re.compile('^.. start-badges.*^.. end-badges', re.M | re.S).sub('', read('README.md')),
-        re.sub(':[a-z]+:`~?(.*?)`', r'``\1``', read('CHANGELOG.rst'))
-    ),
+    long_description='A linear memory CUDA Time Warp Edit Distance algorithm',
     author='Garrett Wright',
     author_email='garrett@gestaltgp.com',
     url='https://github.com/garrettwrong/cuTWED',
@@ -82,7 +79,8 @@ setup(
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*',
     install_requires=[
         'cffi>=1.0.0',
-        # eg: 'aspectlib==1.1.1', 'six>=1.7',
+        'numpy',
+        'pycuda',
     ],
     extras_require={
         # eg:
