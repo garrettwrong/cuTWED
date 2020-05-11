@@ -35,7 +35,7 @@ if 'TOXENV' in os.environ and 'SETUPPY_CFLAGS' in os.environ:
 
 setup(
     name='cuTWED',
-    version='0.2.0',
+    version='0.3.0',
     description='A linear memory CUDA Time Warp Edit Distance algorithm.',
     long_description=long_description,
     long_description_content_type='text/markdown',
