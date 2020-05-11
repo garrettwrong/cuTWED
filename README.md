@@ -99,6 +99,27 @@ If you are a developer you might prefer pip use your local checkout instead.
 pip install -e .
 ```
 
+### Checking
+
+Assuming you have built both the CUDA library and the Python bindings, you can run the unit test suite:
+
+```
+pytest
+```
+
+#### Development Testing
+
+For developers there is a whole mess of configured tests which you can run with:
+
+```
+tox --skip-missing-interpreters
+```
+
+I hope to improve this soon, but there are a _lot_ of complication running hybrid codes with
+free CI tools, and also packaging properly with python etc that need to be worked through.  Some are most
+easily addressed by using a managed CI host, but this is non free.... I suspect this
+is largely why you do not see a plethera of free high performance hybrid codes... perhaps a future project...
+
 ### Using cuTWED in other programs
 
 #### C/C++
@@ -129,13 +150,13 @@ Future plans include a mode for streaming batched mode optimized for large syste
 from cuTWED import twed
 ```
 
-For Python I have included basic pip installable python bindings.  I use it in `example/test.py`.
+For Python I have included basic pip installable python bindings.  I use it in `tests/test_basic.py`.
 If you are curious, these are implemented by a `cffi` backend which parses the C header.
 which is built for you by `setuptools`. The main python interface is in `cuTWED.py`.
 This requires that you have built the library, and have it available in your `LD_LIBRARY_PATH`.
 
 I have also wrapped up the GPU only memory methods in python, using PyCUDA gpuarrays.
-Examples in double and single precision are in `example/test_dev.py`.
+Examples in double and single precision are in `tests/test_basic_dev.py`.
 
 ```
 from cuTWED import twed_dev
