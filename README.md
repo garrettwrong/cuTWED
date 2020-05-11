@@ -62,7 +62,7 @@ you might require.
 
 ```
 # git a copy of the source code
-git clone https://github.com/garrettwrong/cuTWED.git
+git clone https://github.com/garrettwrong/cuTWED
 cd cuTWED
 
 # setup a build area

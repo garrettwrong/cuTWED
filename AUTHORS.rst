@@ -2,4 +2,4 @@
 Authors
 =======
 
-* Garrett Wright - http://gestaltgp.com
+* Garrett Wright - https://www.gestaltgp.com

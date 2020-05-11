@@ -1,0 +1,3 @@
+recommonmark
+sphinx>=1.8.5
+sphinx-rtd-theme

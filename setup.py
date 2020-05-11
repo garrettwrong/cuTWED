@@ -5,7 +5,6 @@ from __future__ import print_function
 
 import io
 import os
-import sys
 from glob import glob
 from os.path import basename
 from os.path import dirname
@@ -24,6 +23,10 @@ def read(*names, **kwargs):
         return fh.read()
 
 
+# Parse the README
+with open("README.md", 'r') as fh:
+    long_description = fh.read()
+
 # Enable code coverage for C code: we can't use CFLAGS=-coverage in tox.ini, since that may mess with compiling
 # dependencies (e.g. numpy). Therefore we set SETUPPY_CFLAGS=-coverage in tox.ini and copy it to CFLAGS here (after
 # deps have been safely installed).
@@ -34,7 +37,8 @@ setup(
     name='cuTWED',
     version='0.2.0',
     description='A linear memory CUDA Time Warp Edit Distance algorithm.',
-    long_description='A linear memory CUDA Time Warp Edit Distance algorithm',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     author='Garrett Wright',
     author_email='garrett@gestaltgp.com',
     url='https://github.com/garrettwrong/cuTWED',
@@ -47,23 +51,22 @@ setup(
         # complete classifier list: http://pypi.python.org/pypi?%3Aaction=list_classifiers
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
-        'Operating System :: Unix',
-        'Operating System :: POSIX',
-        # 'Operating System :: Microsoft :: Windows',
+        'Operating System :: Independent',
         'Programming Language :: Python',
         # 'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
+        # 'Programming Language :: Python :: 3',
+        # 'Programming Language :: Python :: 3.5',
+        # 'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
+        # 'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: Implementation :: CPython',
-        'Programming Language :: Python :: Implementation :: PyPy',
+        # 'Programming Language :: Python :: Implementation :: PyPy',
         # uncomment if you test on these interpreters:
         # 'Programming Language :: Python :: Implementation :: IronPython',
         # 'Programming Language :: Python :: Implementation :: Jython',
         # 'Programming Language :: Python :: Implementation :: Stackless',
         'Topic :: Utilities',
+        'License ::  OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
     ],
     tests_require=['pytest'],
     project_urls={
@@ -82,7 +85,15 @@ setup(
     ],
     extras_require={
         'rst': ['docutils>=0.11'],
-        'tox': ['tox'],
+        'dev': ['tox',
+                'pytest',
+                'check-manifest',
+                'coverage',
+                'readme-renderer',
+                'isort',
+                'recommonmark',
+                'sphinx_rtd_theme',
+                'twine >= 1.12.0'],
         # ':python_version=="2.6"': ['argparse'],
     },
     # We only require CFFI when compiling.
@@ -90,8 +101,7 @@ setup(
     # but we can do it in setup.py.
     setup_requires=[
         'pytest-runner',
-        'cffi>=1.0.0'
-    ] if any(i.startswith('build') or i.startswith('bdist') for i in sys.argv) else [
+        'cffi>=1.0.0',
     ],
     cffi_modules=[i + ':ffibuilder' for i in glob('cuTWED/_*_build.py')],
 )

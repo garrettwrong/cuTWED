@@ -52,8 +52,3 @@ def test_large_call_float():
     print('Python cuTWED distance (single precision): {:f}'.format(dist))
 
     assert np.allclose(dist, reference_result)
-
-
-if __name__ == "__main__":
-    test_large_call()
-    test_large_call_float()

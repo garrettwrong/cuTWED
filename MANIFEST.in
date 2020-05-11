@@ -1,6 +1,6 @@
-#graft docs
+graft docs
 graft cuTWED
-#graft ci
+graft ci
 graft tests
 
 include .bumpversion.cfg
@@ -16,7 +16,9 @@ include README.md
 include pyproject.toml
 
 include tox.ini
-#.travis.yml .appveyor.yml .readthedocs.yml .pre-commit-config.yaml
+include .travis.yml
+include .readthedocs.yml
+#.appveyor.yml .pre-commit-config.yaml
 
 include *.txt
 recursive-include reference_implementation *.c
