@@ -14,7 +14,7 @@ and was used to compare results. There is also a
 The original TWED algorithm is `O(n^2)` in time and space.
 This algorithm is roughly `O(n * n/p)` in time for p (CUDA) cores.
 Most importantly, cuTWED is linear in memory,
-requiring storage for roughly `3*nA + 3*nB` elements.
+requiring storage for roughly `6*nA + 6*nB` elements.
 
 In the process of understanding the dynamic program data dependencies in order to parallelize
 towards the CUDA architecture, I devised a method with improved memory access patterns
@@ -49,9 +49,9 @@ interface after you have built the main CUDA C library.  Generally requires
 
 ### Building
 
-Building has two stages.  First the CUDA C library is built.  It can be peranently installed to your system,
-or just add the path to your `libcuTWED.so` simply added to your `LD_LIBRARY_PATH` (either temorarily or in your
-`.bashrc` etc).
+Building has two stages.  First the CUDA C library is built.  It can be permanently installed to your system,
+or just append the path to  `libcuTWED.so` onto your `LD_LIBRARY_PATH`.  That can be either temorarily or in your
+`.bashrc` etc.
 
 If you would like the python bindings, I have (with great pain) formed a pip installable package for the bindings.
 
