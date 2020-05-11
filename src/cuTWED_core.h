@@ -257,7 +257,6 @@ static REAL_t evalZ(const REAL_t* __restrict__ A, const REAL_t* __restrict__ DA,
 
 
 #ifdef DEBUG
-    /*
     // DBG
     REAL_t* tmp = (REAL_t*)calloc(n, sizeof(REAL_t));
     HANDLE_ERROR(cudaMemcpy(tmp, DP_diag_lag_2, sz, cudaMemcpyDeviceToHost));
@@ -297,7 +296,6 @@ static REAL_t evalZ(const REAL_t* __restrict__ A, const REAL_t* __restrict__ DA,
     }
     free(tmp);
     // DBG
-    */
 #endif
 
   }

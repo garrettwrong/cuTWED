@@ -8,8 +8,9 @@
 
 #include "cuTWED.h"
 
+/* this just loads some static arrays */
 #define REAL_t float
-#include "reference_implementation/reference_arrays.h"
+#include "../reference_implementation/reference_arrays.h"
 
 int main(int argc, char** argv){
 

@@ -14,7 +14,7 @@ and was used to compare results. There is also a
 The original TWED algorithm is `O(n^2)` in time and space.
 This algorithm is roughly `O(n * n/p)` in time for p (CUDA) cores.
 Most importantly, cuTWED is linear in memory,
-requiring storage for roughly `3*nA + 3*nB` elements.
+requiring storage for roughly `6*nA + 6*nB` elements.
 
 In the process of understanding the dynamic program data dependencies in order to parallelize
 towards the CUDA architecture, I devised a method with improved memory access patterns
@@ -40,21 +40,66 @@ Some speed comparisons and a more formal explanation will follow.
 
 ### Requirements
 
-You will need NVCC and a CUDA capable card that can fit your problem.
-The problem is roughly 6*n elements in memory for time series of length n.
+For the CUDA code you will need NVCC, a CUDA capable card and CMake.
+Otherwise, the CUDA code has no dependencies.
+
+For the Python binding `pip` manages the specific depends and installation of the Python
+interface after you have built the main CUDA C library.  Generally requires
+`numpy`, `pycuda`, and `cffi`.  I recommend you use virtualenv or conda to manage python.
 
 ### Building
 
+Building has two stages.  First the CUDA C library is built.  It can be permanently installed to your system,
+or just append the path to  `libcuTWED.so` onto your `LD_LIBRARY_PATH`.  That can be either temorarily or in your
+`.bashrc` etc.
+
+If you would like the python bindings, I have (with great pain) formed a pip installable package for the bindings.
+
+#### Building the core CUDA C library
+
+Note you may customize the call to `cmake` below with flags like `-DCMAKE_INSTALL_PREFIX=/opt/`, or other flags
+you might require.
+
 ```
-make -j
+# git a copy of the source code
+git clone https://github.com/garrettwrong/cuTWED
+cd cuTWED
+
+# setup a build area
+mkdir build
+cd build
+cmake ../ # configures/generates makefiles
+
+# make
+make -j  # builds the software
 ```
 
-The makefile is pretty basic so it can be edited to suit your needs.
+This should create several files in the `build` directory including `libcuTWED.so`, `*.h` headers, and some other stuff.
+To install to your system (may require sudo):
 
-This builds on OSX and multiple flavors of Linux with more/less default installs.
-If you would like to pursue Windows, please do and report back, I can try to integrate the effort.
+```
+make install
+```
 
-### Using in other programs
+If you just want to temporarily have the library available on your linux machine you can just use the LD path.
+This makes no changes to your system outside the repo and this shell process.
+```
+export LD_LIBRARY_PATH=$PWD:$LD_LIBRARY_PATH
+```
+
+#### Python
+Once you have the CUDA C library readied, we can use `pip` for the python bindings.
+
+```
+pip install cuTWED
+```
+
+If you are a developer you might prefer pip use your local checkout instead.
+```
+pip install -e .
+```
+
+### Using cuTWED in other programs
 
 #### C/C++
 
@@ -80,19 +125,21 @@ Future plans include a mode for streaming batched mode optimized for large syste
 
 #### Python
 
-For Python I have included basic bindings in `cuTWED.py` and I use it in `example/test.py`.
-This requires that you have built the library, and have it available in your `LD_LIBRARY_PATH`.
-You may not need the LD_LIBRARY_PATH line, but I have included it here for completeness.
-The following works for me out of the box on my linux for quick development:
+```
+from cuTWED import twed
+```
 
-```
-make -j
-export LD_LIBRARY_PATH=$PWD:$LD_LIBRARY_PATH
-python examples/test.py
-```
+For Python I have included basic pip installable python bindings.  I use it in `example/test.py`.
+If you are curious, these are implemented by a `cffi` backend which parses the C header.
+which is built for you by `setuptools`. The main python interface is in `cuTWED.py`.
+This requires that you have built the library, and have it available in your `LD_LIBRARY_PATH`.
 
 I have also wrapped up the GPU only memory methods in python, using PyCUDA gpuarrays.
 Examples in double and single precision are in `example/test_dev.py`.
+
+```
+from cuTWED import twed_dev
+```
 
 ## License
 
