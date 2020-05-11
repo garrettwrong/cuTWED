@@ -1,4 +1,4 @@
-# cuTWED
+# cuTWED v0.2.0
 
 A linear memory CUDA adaptation of the Time Warp Edit Distance algorithm.
 
