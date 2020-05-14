@@ -170,6 +170,123 @@ void CTWED(double ta[], int *la, double tsa[], double tb[], int *lb, double tsb[
         free(Dj1);
 }
 
+void CTWED_nd(double ta[], int *la, double tsa[], double tb[], int *lb, double tsb[], double *nu, double *lambda, int *degree, double *dist, int ndim) {
+        // 
+        //    TWED PAMI
+        //    
+        if(*la<0||*lb<0){
+                fprintf(stderr, "twed: the lengths of the input timeseries should be greater or equal to 0\n");
+                exit(-1);
+                }
+        int r = *la;
+        int c = *lb;
+        int deg = *degree;
+        double disti1, distj1;
+        int i,j,d;
+
+        // allocations
+        double **D = (double **)calloc((r+1), sizeof(double*));
+        double *Di1 = (double *)calloc((r+1)*ndim, sizeof(double));
+        double *Dj1 = (double *)calloc((c+1)*ndim, sizeof(double));
+        
+        double dmin, htrans, dist0;
+        
+        for(i=0; i<=r; i++) {
+          D[i]=(double *)calloc((c+1), sizeof(double));
+        }
+        // local costs initializations
+        for(j=1; j<=c; j++) {
+                distj1=0;
+                for(d=0; d<ndim; d++){
+                  if(j>1){
+                    distj1+=pow(fabs(tb[j-2]-tb[j-1]),deg); 
+                  }
+                  else distj1+=pow(fabs(tb[j-1]),deg);
+                }
+                //Dj1[j]=distj1;
+                Dj1[j]=sqrt(distj1);  // NOTE original author did not sqrt
+                //printf("Dj1[ %d ] = %f\n", j, distj1);
+        }
+        
+        for(i=1; i<=r; i++) { 
+                disti1=0;
+                for(d=0; d<ndim; d++){
+                  if(i>1)
+                    disti1+=pow(fabs(ta[i-2]-ta[i-1]),deg);
+                  else disti1+=pow(fabs(ta[i-1]),deg);
+                }
+                //Di1[i]=disti1;
+                Di1[i]=sqrt(disti1); // NOTE original author did not sqrt
+  
+                for(j=1; j<=c; j++) {
+                        (*dist)=0;
+                        (*dist)+=pow(fabs(ta[i-1]-tb[j-1]),deg);        
+                        if(i>1&&j>1)
+                                (*dist)+=pow(fabs(ta[i-2]-tb[j-2]),deg);
+
+                D[i][j]=*dist;
+                //printf("D[ %d ][ %d ] = %f\n", i, j, *dist);
+                }
+        } // for i
+        
+        // border of the cost matrix initialization
+        D[0][0]=0;
+        for(i=1; i<=r; i++)
+                D[i][0]=INFINITY;
+        for(j=1; j<=c; j++)
+                D[0][j]=INFINITY;
+
+
+        for (i=1; i<=r; i++){
+          
+                for (j=1; j<=c; j++){
+                        htrans=fabs((double)(tsa[i-1]-tsb[j-1]));
+                        if(j>1&&i>1)
+                                htrans+=fabs((double)(tsa[i-2]-tsb[j-2]));
+                        dist0=D[i-1][j-1]+D[i][j]+(*nu)*htrans;
+                        dmin=dist0;
+                        if(i>1)
+                                htrans=((double)(tsa[i-1]-tsa[i-2]));
+                        else htrans=(double)tsa[i-1];
+
+                        (*dist)=Di1[i]+D[i-1][j]+(*lambda)+(*nu)*htrans;
+
+                        if(dmin>(*dist)){
+                                dmin=(*dist);
+                        }
+
+                        
+                        if(j>1)
+                                htrans=((double)(tsb[j-1]-tsb[j-2]));
+                        else htrans=(double)tsb[j-1]; 
+                        (*dist)=Dj1[j]+D[i][j-1]+(*lambda)+(*nu)*htrans; 
+                        if(dmin>(*dist)){
+                                dmin=(*dist);
+                        } 
+                        D[i][j] = dmin;
+                }
+        }
+
+        (*dist) = D[r][c];
+
+        /* for(int row=0; row<= *la; row++){ */
+        /*   for(c=0; c<= *lb; c++){ */
+        /*     printf("%f, ", D[row][c]); */
+        /*   } */
+        /*   printf("\n"); */
+        /* } */
+
+
+        // freeing
+        for(i=0; i<=r; i++) {
+                free(D[i]);
+        }
+        free(D);
+        free(Di1);
+        free(Dj1);
+}
+
+
 
 int main(int argc, char** argv){
 
