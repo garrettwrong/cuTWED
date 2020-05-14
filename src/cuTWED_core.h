@@ -34,9 +34,9 @@ __device__ REAL_t lpnorm(const int p,
   }
 
   /* this is not strictly necessary for our purposes... */
-  s = pow(s, 1./pf); 
+  s = pow(s, (REAL_t)1./pf);
 
-  return s;      
+  return s;
 }
 
 __device__ void vsub(const int dim,
