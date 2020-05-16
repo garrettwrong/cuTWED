@@ -24,7 +24,7 @@ build:centos7_cuda:
 
 build:ubuntu18.04_cuda:
   stage: build_CUDA
-  image: nvidia/cuda:10.2-devel-ubuntu18.04
+  image: garrettwrong/ubuntu18.04_cuda
   script:
     - mkdir build
     - cd build
@@ -56,7 +56,7 @@ RunCentos:
 
 RunUbuntu:
   stage: test_Python
-  image: nvidia/cuda:10.2-devel-ubuntu18.04
+  image: garrettwrong/ubuntu18.04_cuda
   script:
     - export LD_LIBRARY_PATH=target/lib:${LD_LIBRARY_PATH}
     - pip install cuTWED
