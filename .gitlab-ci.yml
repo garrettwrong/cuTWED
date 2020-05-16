@@ -1,0 +1,59 @@
+stages:
+  - build_CUDA
+  - test_Python
+
+build:centos7_cuda:
+  stage: build_CUDA
+  image: garrettwrong/centos7_cuda10:latest
+  script:
+    - mkdir build
+    - cd build
+    - cmake -DCMAKE_INSTALL_PREFIX=target ..
+    - make
+    - make install
+    - ./test.x
+    - ./testf.x
+    - ./twed.x
+  artifacts:
+    when: always
+    paths:
+    - target
+    expire_in: 1 week
+
+build:ubuntu18.04_cuda:
+  stage: build_CUDA
+  image: nvidia/cuda:10.2-devel-ubuntu18.04
+  script:
+    - mkdir build
+    - cd build
+    - cmake -DCMAKE_INSTALL_PREFIX=target ..
+    - make
+    - make install
+    - ./test.x
+    - ./testf.x
+    - ./twed.x
+  artifacts:
+    when: always
+    paths:
+    - target
+    expire_in: 1 week
+
+RunCentos:
+  stage: test_Python
+  image: garrettwrong/cuorbit_centos-7:latest
+  script:
+    - export LD_LIBRARY_PATH=target/lib:${LD_LIBRARY_PATH}
+    - pip install cuTWED
+    - pytest
+  dependencies:
+  - build:centos7_cuda
+
+RunUbuntu:
+  stage: test_Python
+  image: nvidia/cuda:10.2-devel-ubuntu18.04
+  script:
+    - export LD_LIBRARY_PATH=target/lib:${LD_LIBRARY_PATH}
+    - pip install cuTWED
+    - pytest
+  dependencies:
+  - build:ubuntu18.04_cuda
