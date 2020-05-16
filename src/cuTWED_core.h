@@ -60,7 +60,7 @@ __global__ void local_distance_kernel(const REAL_t* __restrict__ A, const int nA
   /* Implicitly assumed D can hold nA + 1 elements. */
   const int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
-  REAL_t tmp[DIMENSION_CUTOVER];
+  REAL_t tmp[DIMENSION_LIMIT];
   
   REAL_t d;
 
@@ -79,52 +79,6 @@ __global__ void local_distance_kernel(const REAL_t* __restrict__ A, const int nA
 
   DA[tid] = d;
 }
-
-__global__ void local_distance_shared_mem_kernel(const REAL_t* __restrict__ A, const int nA, const int degree,
-                                                 const int dim,
-                                      REAL_t* __restrict__ DA){
-  /* Implicitly assumed D can hold nA + 1 elements. */
-  const int dimid = blockIdx.x * blockDim.x + threadIdx.x;
-  const int tid = blockIdx.y * blockDim.y + threadIdx.y;
-  const REAL_t pf = (REAL_t)degree;
-  int i;
-  REAL_t d;
-
-  __shared__ REAL_t tmp[DIMENSION_CUTOVER * DIMENSION_CUTOVER];
-  
-  if( tid > nA ) return;
-
-  if(tid == 0 || dimid >=dim){
-    /*d = 0.; */
-    tmp[threadIdx.y*DIMENSION_CUTOVER + dimid] = 0;
-  }
-  else if(tid == 1) {
-    tmp[threadIdx.y*DIMENSION_CUTOVER + dimid] = A[tid-1*dim];
-  }
-  else {
-    tmp[threadIdx.y*DIMENSION_CUTOVER + dimid] = A[tid-1*dim] - A[tid-2*dim];
-  }
-
-  /* raise to power */
-  tmp[threadIdx.y*DIMENSION_CUTOVER + threadIdx.x] = pow(tmp[threadIdx.y*DIMENSION_CUTOVER + threadIdx.x], pf);
-  /* each block sums */
-  if(threadIdx.x==0){
-    for(i=1; i<blockDim.x; i++){
-      tmp[threadIdx.y*DIMENSION_CUTOVER] += tmp[threadIdx.y*DIMENSION_CUTOVER + i];
-    }
-    /* then we sum the blocks */
-    if(dimid==0){
-      d=0;
-      for(i=0; i < gridDim.x; i++){
-      d += tmp[threadIdx.y*DIMENSION_CUTOVER + i];
-      }
-      /* assign the accumulated sum */
-      DA[tid] = d;
-    }
-  }  
-}
-
-
 
 
 __global__ void evalZ_kernel(int diagIdx,
@@ -164,6 +118,7 @@ __global__ void evalZ_kernel(int diagIdx,
   /*
     Compute the initial DP disance for this entry.
   */
+  int i;
   REAL_t d;
   if(row==0 && col==0){
     d = 0;
@@ -171,10 +126,15 @@ __global__ void evalZ_kernel(int diagIdx,
     d = INFINITY;
   }
   else{
-    d = pow( fabs( A[row - 1] - B[col - 1]), degree);
-    if(row>1 && col>1){
-      d += pow( fabs( A[row - 2] - B[col - 2]), degree);
+
+    d=0;
+    for(i=0; i<dim; i++){
+      d += pow( fabs( A[(row - 1)*dim + i] - B[(col - 1)*dim + i]), degree);
+      if(row>1 && col>1){
+        d += pow( fabs( A[(row - 2)*dim + i] - B[(col - 2)*dim + i]), degree);
+      }
     }
+    d = pow(d, (REAL_t)1./degree);
   }
 
   //DBG printf("d [%d] = %f;\n", tid, d);
@@ -379,12 +339,13 @@ extern "C" {
     /*
       Sanity Check
     */
-    /*    if(dim > DIMENSION_CUTOVER){
-      printf("Error, supplied dimension %d is greater than compiled DIMENSION_CUTOVER %d\n. Exiting",
-             dim, DIMENSION_CUTOVER);
-      exit(1);
+    if(dim > DIMENSION_LIMIT){
+      printf("Error, supplied dimension %d is greater than compiled DIMENSION_LIMIT %d.\n" \
+             "  If encountered during units tests, this is probably safe to ignore, (different stream).\n" \
+             "  If that was not a mistake, you may change DIMENSION_LIMIT and recomplile. Exiting.\n",
+             dim, DIMENSION_LIMIT);
+      return -1.;
     }
-    */
 
     const int nstreams = 2;
     int s;
@@ -399,35 +360,16 @@ extern "C" {
     HANDLE_ERROR(cudaMalloc(&DB_dev, szb));
 
     /* compute initial distance A */
-    if(dim < DIMENSION_CUTOVER){
-      block_dim.x = 256;
-      grid_dim.x = (nA + block_dim.x - 1) / block_dim.x;
-      local_distance_kernel<<<grid_dim, block_dim, 0, streams[0]>>>(A_dev, nA, degree, dim, DA_dev);
-      HANDLE_ERROR(cudaPeekAtLastError());
+    block_dim.x = 256;
+    grid_dim.x = (nA + block_dim.x - 1) / block_dim.x;
+    local_distance_kernel<<<grid_dim, block_dim, 0, streams[0]>>>(A_dev, nA, degree, dim, DA_dev);
+    HANDLE_ERROR(cudaPeekAtLastError());
 
-      /* compute initial distance B */
-      block_dim.x = 256;
-      grid_dim.x = (nB + block_dim.x - 1) / block_dim.x;
-      local_distance_kernel<<<grid_dim, block_dim, 0, streams[1]>>>(B_dev, nB, degree, dim, DB_dev);
-      HANDLE_ERROR(cudaPeekAtLastError());
-    }
-    else{
-      size_t shmem = DIMENSION_CUTOVER * DIMENSION_CUTOVER * sizeof(REAL_t);
-      block_dim.x = DIMENSION_CUTOVER;
-      block_dim.y = 32;
-      grid_dim.x = (dim + block_dim.x - 1) / block_dim.x;
-      grid_dim.y = (nA + block_dim.y - 1) / block_dim.y;
-      local_distance_shared_mem_kernel<<<grid_dim, block_dim, shmem, streams[0]>>>(A_dev, nA, degree, dim, DA_dev);
-      HANDLE_ERROR(cudaPeekAtLastError());
-
-      /* compute initial distance B */
-      block_dim.x = DIMENSION_CUTOVER;
-      block_dim.y = 32;
-      grid_dim.x = (dim + block_dim.x - 1) / block_dim.x;
-      grid_dim.y = (nB + block_dim.y - 1) / block_dim.y;      
-      local_distance_shared_mem_kernel<<<grid_dim, block_dim, shmem, streams[1]>>>(B_dev, nB, degree, dim, DB_dev);
-      HANDLE_ERROR(cudaPeekAtLastError());
-    }
+    /* compute initial distance B */
+    block_dim.x = 256;
+    grid_dim.x = (nB + block_dim.x - 1) / block_dim.x;
+    local_distance_kernel<<<grid_dim, block_dim, 0, streams[1]>>>(B_dev, nB, degree, dim, DB_dev);
+    HANDLE_ERROR(cudaPeekAtLastError());
 
     HANDLE_ERROR(cudaDeviceSynchronize());
 

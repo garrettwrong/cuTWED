@@ -68,7 +68,12 @@ def twed(A, TA, B, TB, nu, lamb, degree=2):
     else:
         raise RuntimeError("Expected inputs to be np.float32 or np.float64")
 
-    return func(caster(A), nA, caster(TA), caster(B), nB, caster(TB), nu, lamb, degree, dim)
+    result = func(caster(A), nA, caster(TA), caster(B), nB, caster(TB), nu, lamb, degree, dim)
+
+    if result < 0:
+        raise RuntimeError(f"cuTWED call failed with {result}.")
+
+    return result
 
 
 def twed_dev(A, TA, B, TB, nu, lamb, degree=2):
@@ -117,4 +122,9 @@ def twed_dev(A, TA, B, TB, nu, lamb, degree=2):
     else:
         raise RuntimeError("Expected inputs to be np.float32 or np.float64")
 
-    return func(caster(A), nA, caster(TA), caster(B), nB, caster(TB), nu, lamb, degree, dim)
+    result = func(caster(A), nA, caster(TA), caster(B), nB, caster(TB), nu, lamb, degree, dim)
+
+    if result < 0:
+        raise RuntimeError(f"cuTWED call failed with {result}.")
+
+    return result

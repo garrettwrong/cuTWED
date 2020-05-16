@@ -35,7 +35,7 @@ nu = 1.
 lamb = 1.
 degree = 2
 
-reference_result = 54.827250
+reference_result = 51.294762
 
 
 def test_basic_dev():
