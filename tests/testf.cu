@@ -25,4 +25,5 @@ int main(int argc, char** argv){
 
   printf("cuTWED dist: %f\n", dist);
 
+  return 0;
 }
