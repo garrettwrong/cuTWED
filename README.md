@@ -55,6 +55,8 @@ were made to facilitate refence testing cuTWED and also make the original code m
 For the CUDA code you will need NVCC, a CUDA capable card and CMake.
 Otherwise, the CUDA code has no dependencies.
 
+If you do not have CMake or it is too old, a lot of people just pip install it `pip install cmake>=3.11`.
+
 For the Python binding `pip` manages the specific depends and installation of the Python
 interface after you have built the main CUDA C library.  Generally requires
 `numpy`, `pycuda`, and `cffi`.  I recommend you use virtualenv or conda to manage python.
