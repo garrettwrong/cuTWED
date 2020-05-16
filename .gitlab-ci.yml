@@ -1,0 +1,63 @@
+stages:
+  - build_CUDA
+  - test_Python
+
+build:centos7_cuda:
+  stage: build_CUDA
+  image: garrettwrong/centos7_cuda10:latest
+  script:
+    - mkdir build
+    - cd build
+    - cmake3 -DCMAKE_INSTALL_PREFIX=target ..
+    - make
+    - make install
+    - ./test.x
+    - ./testf.x
+    - ./twed.x
+  artifacts:
+    when: always
+    paths:
+    - build/target
+    expire_in: 1 week
+  tags:
+    - kepler
+
+BuildInstallTest:ubuntu18.04_cuda:
+  stage: build_CUDA
+  image: garrettwrong/ubuntu18.04_cuda
+  script:
+    - mkdir build
+    - cd build
+    - cmake -DCMAKE_INSTALL_PREFIX=target ..
+    - make
+    - make install
+    - ./test.x
+    - ./testf.x
+    - ./twed.x
+    - cd ..
+    - export LD_LIBRARY_PATH=${PWD}/build/target/lib:${LD_LIBRARY_PATH}
+    - cp -v build/target/lib/libcuTWED.so cuTWED/
+    - pip3 install .
+    - pip3 install pytest
+    - pytest
+  artifacts:
+    when: always
+    paths:
+    - build/target
+    expire_in: 1 week
+  tags:
+    - kepler
+
+RunCentos:
+  stage: test_Python
+  image: garrettwrong/centos7_cuda10
+  script:
+    - export LD_LIBRARY_PATH=${PWD}/build/target/lib:${LD_LIBRARY_PATH}
+    - export LIBRARY_PATH=${PWD}/build/target/lib:${LIBRARY_PATH}
+    - pip3 install .
+    - pip3 install pytest
+    - pytest
+  dependencies:
+  - build:centos7_cuda
+  tags:
+    - kepler

@@ -182,7 +182,8 @@ int main(int argc, char** argv){
   
   CTWED(A, &nA, TA, B, &nB, TB, &nu, &lambda, &degree, &dist);
   printf("CTWED dist: %f\n", dist);
-  
+
+  return 0;
 }
 
 

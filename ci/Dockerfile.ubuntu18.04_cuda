@@ -1,0 +1,11 @@
+FROM  nvidia/cuda:10.2-devel-ubuntu18.04
+
+RUN apt-get update
+RUN apt-get install curl cmake python3-pip -y
+
+## Manually install later CMake
+#RUN curl -o cmake-3.16.5.tar.gz https://github.com/Kitware/CMake/releases/download/v3.16.5/cmake-3.16.5.tar.gz \
+#    && tar -zxvf cmake-3.16.5.tar.gz \
+#    && cd cmake-3.16.5 \
+#    && ./bootstrap \
+#    && make install

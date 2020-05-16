@@ -38,7 +38,12 @@ ffibuilder.set_source("_cuTWED",
                       """
      #include "cuTWED.h.i"   // the C header of the library
                       """,
-                      libraries=['cuTWED'],   # library name, for the linker
+                      include_dirs=['cuTWED'],
+                      # shared, works, not easily portable, user's ld paths etc etc
+                      library_dirs=['cuTWED'],
+                      libraries=['cuTWED'],   # shared library name, for the linker
+                      # extra_objects=[''],
+                      # extra_link_args=[''],
                       )
 
 if __name__ == "__main__":

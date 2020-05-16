@@ -1,0 +1,8 @@
+FROM nvidia/cuda:10.2-devel-centos7
+
+# Setup the base system, this is probably oversight by NVIDIA maintainer
+RUN yum group install "Development Tools" -y
+RUN yum install epel-release -y
+RUN yum install cmake3 -y
+RUN yum install python36 python36-devel -y
+RUN python3.6 -m ensurepip

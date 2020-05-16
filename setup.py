@@ -35,7 +35,7 @@ if 'TOXENV' in os.environ and 'SETUPPY_CFLAGS' in os.environ:
 
 setup(
     name='cuTWED',
-    version='0.3.0',
+    version='0.3.1',
     description='A linear memory CUDA Time Warp Edit Distance algorithm.',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -74,7 +74,7 @@ setup(
     keywords=[
         # eg: 'keyword1', 'keyword2', 'keyword3',
     ],
-    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*',
+    python_requires='!=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*',
     install_requires=[
         'cffi>=1.0.0',
         'numpy',
@@ -91,7 +91,6 @@ setup(
                 'recommonmark',
                 'sphinx_rtd_theme',
                 'twine >= 1.12.0'],
-        # ':python_version=="2.6"': ['argparse'],
     },
     # We only require CFFI when compiling.
     # pyproject.toml does not support requirements only for some build actions,
@@ -101,4 +100,5 @@ setup(
         'cffi>=1.0.0',
     ],
     cffi_modules=[i + ':ffibuilder' for i in glob('cuTWED/_*_build.py')],
+    headers=['cuTWED/cuTWED.h.i'],
 )
