@@ -36,7 +36,7 @@ BuildInstallTest:ubuntu18.04_cuda:
     - ./twed.x
     - cd ..
     - export LD_LIBRARY_PATH=${PWD}/build/target/lib:${LD_LIBRARY_PATH}
-    - cp -v buid/target/lib/libcuTWED.so cuTWED/
+    - cp -v build/target/lib/libcuTWED.so cuTWED/
     - pip3 install .
     - pip3 install pytest
     - pytest
