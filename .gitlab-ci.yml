@@ -47,7 +47,7 @@ RunCentos:
   image: garrettwrong/cuorbit_centos-7:latest
   script:
     - export LD_LIBRARY_PATH=build/target/lib:${LD_LIBRARY_PATH}
-    - pip install cuTWED
+    - pip3 install cuTWED
     - pytest
   dependencies:
   - build:centos7_cuda
@@ -59,7 +59,7 @@ RunUbuntu:
   image: garrettwrong/ubuntu18.04_cuda
   script:
     - export LD_LIBRARY_PATH=build/target/lib:${LD_LIBRARY_PATH}
-    - pip install cuTWED
+    - pip3 install cuTWED
     - pytest
   dependencies:
   - build:ubuntu18.04_cuda
