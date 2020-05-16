@@ -19,6 +19,8 @@ build:centos7_cuda:
     paths:
     - target
     expire_in: 1 week
+  tags:
+    - kepler
 
 build:ubuntu18.04_cuda:
   stage: build_CUDA
@@ -37,6 +39,8 @@ build:ubuntu18.04_cuda:
     paths:
     - target
     expire_in: 1 week
+  tags:
+    - kepler
 
 RunCentos:
   stage: test_Python
@@ -47,6 +51,8 @@ RunCentos:
     - pytest
   dependencies:
   - build:centos7_cuda
+  tags:
+    - kepler
 
 RunUbuntu:
   stage: test_Python
@@ -57,3 +63,5 @@ RunUbuntu:
     - pytest
   dependencies:
   - build:ubuntu18.04_cuda
+  tags:
+    - kepler
