@@ -40,6 +40,7 @@ add_custom_target(
 
 # make install stuff
 install(TARGETS cuTWED DESTINATION lib)
+install(TARGETS cuTWED DESTINATION cuTWED) # so cffi can find
 install(FILES src/cuTWED.h DESTINATION include)
 install(FILES src/cuTWED_core.h DESTINATION include)
 
