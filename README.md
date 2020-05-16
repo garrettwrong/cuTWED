@@ -51,7 +51,8 @@ interface after you have built the main CUDA C library.  Generally requires
 
 Building has two stages.  First the CUDA C library is built.  It can be permanently installed to your system,
 or just append the path to  `libcuTWED.so` onto your `LD_LIBRARY_PATH`.  That can be either temorarily or in your
-`.bashrc` etc.
+`.bashrc` etc.  If you follow this guide on linux things should probably work.  If you customize, you may have to
+manage your LD_LIBRARY_PATH, LIBRARY_PATH, and INCLUDES in ways that are more typical of C/C++ libraries then python...
 
 If you would like the python bindings, I have (with great pain) formed a pip installable package for the bindings.
 
@@ -91,10 +92,10 @@ export LD_LIBRARY_PATH=$PWD:$LD_LIBRARY_PATH
 Once you have the CUDA C library readied, we can use `pip` for the python bindings.
 
 ```
-pip install cuTWED
+pip install .
 ```
 
-If you are a developer you might prefer pip use your local checkout instead.
+If you are a developer you might prefer pip install in local editable mode instead.
 ```
 pip install -e .
 ```
