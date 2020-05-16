@@ -16,7 +16,6 @@ include README.md
 include pyproject.toml
 
 include tox.ini
-include .travis.yml
 include .readthedocs.yml
 #.appveyor.yml .pre-commit-config.yaml
 

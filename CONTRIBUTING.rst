@@ -2,8 +2,7 @@
 Contributing
 ============
 
-Contributions are welcome, and they are greatly appreciated! Every
-little bit helps, and credit will always be given.
+Contributions are welcome, and they are greatly appreciated!
 
 Bug reports
 ===========
@@ -11,6 +10,7 @@ Bug reports
 When `reporting a bug <https://github.com/garrettwrong/cuTWED/issues>`_ please include:
 
     * Your operating system name and version.
+    * Your CUDA Toolkit version, driver, and card(s).
     * Any details about your local setup that might be helpful in troubleshooting.
     * Detailed steps to reproduce the bug.
 
@@ -30,7 +30,7 @@ If you are proposing a feature:
 
 * Explain in detail how it would work.
 * Keep the scope as narrow as possible, to make it easier to implement.
-* Remember that this is a volunteer-driven project, and that code contributions are welcome :)
+* Remember that this is a voluntary project.  You are welcome to improve things and push the improvements back to the author for review. Consider discussing such work in the issue.
 
 Development
 ===========
@@ -64,7 +64,7 @@ To set up `cuTWED` for local development:
 Pull Request Guidelines
 -----------------------
 
-If you need some code review or feedback while you're developing the code just make the pull request.
+If you need some code review or feedback while you're developing the code just make the pull request as a draft.
 
 For merging, you should:
 
@@ -73,10 +73,8 @@ For merging, you should:
 3. Add a note to ``CHANGELOG.rst`` about the changes.
 4. Add yourself to ``AUTHORS.rst``.
 
-.. [1] If you don't have all the necessary python versions available locally you can rely on Travis - it will
-       `run the tests <https://travis-ci.org/garrettwrong/cuTWED/pull_requests>`_ for each change you add in the pull request.
-
-       It will be slower though ...
+.. [1] If you don't have all the necessary python versions available locally you can try running against what you have with ```tox --skip-missing-interpreters```.
+.. [2] You may find the basic Docker containers helpful.  They can be easily extended and still kept in isolation.  See `.gitlab-ci.yml` for a basis.
 
 Tips
 ----
