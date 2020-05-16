@@ -49,6 +49,7 @@ RunCentos:
     - export LD_LIBRARY_PATH=${PWD}/build/target/lib:${LD_LIBRARY_PATH}
     - export LIBRARY_PATH=${PWD}/build/target/lib:${LIBRARY_PATH}
     - pip3 install .
+    - pip3 install pytest
     - pytest
   dependencies:
   - build:centos7_cuda
@@ -62,6 +63,7 @@ RunUbuntu:
     - export LD_LIBRARY_PATH=${PWD}build/target/lib:${LD_LIBRARY_PATH}
     - export LIBRARY_PATH=${PWD}/build/target/lib:${LIBRARY_PATH}
     - pip3 install .
+    - pip3 install pytest
     - pytest
   dependencies:
   - build:ubuntu18.04_cuda
