@@ -34,6 +34,7 @@ BuildInstallTest:ubuntu18.04_cuda:
     - ./test.x
     - ./testf.x
     - ./twed.x
+    - cd ..
     - export LD_LIBRARY_PATH=${PWD}/build/target/lib:${LD_LIBRARY_PATH}
     - pip3 install .
     - pip3 install pytest
