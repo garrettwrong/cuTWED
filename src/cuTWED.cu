@@ -26,13 +26,15 @@
 /* #define DEBUG */
 
 
-/* Note this DIMENSION_CUTOVER is easily changed with some care.
+/* Note this DIMENSION_LIMIT is easily changed with some care.
    But you want to stay in fast memory...
    Small values can live in registers...
    Medium, __shared__...
    Absurd, global...
+
+   I figure most commone values might be 1,2, or 3 dim...
 */
-static const int DIMENSION_CUTOVER = 32;
+static const int DIMENSION_LIMIT = 32;
 
 
 /*
