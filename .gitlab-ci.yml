@@ -8,7 +8,7 @@ build:centos7_cuda:
   script:
     - mkdir build
     - cd build
-    - cmake -DCMAKE_INSTALL_PREFIX=target ..
+    - cmake3 -DCMAKE_INSTALL_PREFIX=target ..
     - make
     - make install
     - ./test.x
@@ -17,7 +17,7 @@ build:centos7_cuda:
   artifacts:
     when: always
     paths:
-    - target
+    - build/target
     expire_in: 1 week
   tags:
     - kepler
@@ -37,7 +37,7 @@ build:ubuntu18.04_cuda:
   artifacts:
     when: always
     paths:
-    - target
+    - build/target
     expire_in: 1 week
   tags:
     - kepler
@@ -46,7 +46,7 @@ RunCentos:
   stage: test_Python
   image: garrettwrong/cuorbit_centos-7:latest
   script:
-    - export LD_LIBRARY_PATH=target/lib:${LD_LIBRARY_PATH}
+    - export LD_LIBRARY_PATH=build/target/lib:${LD_LIBRARY_PATH}
     - pip install cuTWED
     - pytest
   dependencies:
@@ -58,7 +58,7 @@ RunUbuntu:
   stage: test_Python
   image: garrettwrong/ubuntu18.04_cuda
   script:
-    - export LD_LIBRARY_PATH=target/lib:${LD_LIBRARY_PATH}
+    - export LD_LIBRARY_PATH=build/target/lib:${LD_LIBRARY_PATH}
     - pip install cuTWED
     - pytest
   dependencies:
