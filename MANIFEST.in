@@ -15,7 +15,7 @@ include pyproject.toml
 
 include tox.ini
 include .readthedocs.yml
-include .gitlab-ci.yml
+include *.yml
 #.appveyor.yml .pre-commit-config.yaml
 
 include *.txt

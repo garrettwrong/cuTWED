@@ -17,11 +17,11 @@
 #ifndef __cuTWED_H_
 #define __cuTWED_H_
 
-#ifdef __cplusplus  
-extern "C" { 
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-  
+
 
   /*
     A, B are arrays of time series values.
@@ -54,14 +54,16 @@ extern "C" {
   /*
     Mallocs memory on device, approximately (6*nA + 6*nB) * sizeof(REAL_t)
   */
-  void twed_malloc_dev(int nA, double **A_dev, double  **TA_dev,
-                       int nB, double **B_dev, double  **TB_dev);
+  void twed_malloc_dev(const int nA, double **A_dev, double  **TA_dev,
+                       const int nB, double **B_dev, double  **TB_dev,
+                       const int dim, const int nAA, const int nBB);
 
-  void twed_malloc_devf(int nA, float **A_dev, float  **TA_dev,
-                        int nB, float **B_dev, float  **TB_dev);
+  void twed_malloc_devf(const int nA, float **A_dev, float  **TA_dev,
+                        const int nB, float **B_dev, float  **TB_dev,
+                        const int dim, const int nAA, const int nBB);
 
 
-  
+
   /*
     Frees memory malloc'd in twed_malloc_dev
   */
@@ -73,18 +75,47 @@ extern "C" {
 
   /*
     Copies data from host to device. You would only use this function if you
-    are writing logic to resuse gpu memory.
+    are writing logic to reuse gpu memory.
   */
-  void twed_copy_to_dev(int nA, double A[], double A_dev[], double TA[], double TA_dev[],
-                        int nB, double B[], double B_dev[], double TB[], double TB_dev[]);
+  void twed_copy_to_dev(const int nA, double A[], double A_dev[], double TA[], double TA_dev[],
+                        const int nB, double B[], double B_dev[], double TB[], double TB_dev[],
+                        const int dim, const int nAA, const int nBB);
 
-  void twed_copy_to_devf(int nA, float A[], float A_dev[], float TA[], float TA_dev[],
-                         int nB, float B[], float B_dev[], float TB[], float TB_dev[]);
+  void twed_copy_to_devf(const int nA, float A[], float A_dev[], float TA[], float TA_dev[],
+                         const int nB, float B[], float B_dev[], float TB[], float TB_dev[],
+                         const int dim, const int nAA, const int nBB);
+
+
+  /*
+    Batch calls for TWED.
+      Expects AA as (nAA, nA, dim) array for A.
+      Expects BB as (nBB, nB, dim) array for B.
+      RRes is a pointer to result scratch space.
+  */
+  int twed_batch(double AA_dev[], int nA, double TAA_dev[],
+                 double BB_dev[], int nB, double TBB_dev[],
+                 double nu, double lambda, int degree, int dim,
+                 int nAA, int nBB, double* RRes);
+
+  int twed_batchf(float AA_dev[], int nA, float TAA_dev[],
+                  float BB_dev[], int nB, float TBB_dev[],
+                  float nu, float lambda, int degree, int dim,
+                  int nAA, int nBB, float* RRes);
+
+  int twed_batch_dev(double AA_dev[], int nA, double TAA_dev[],
+                     double BB_dev[], int nB, double TBB_dev[],
+                     double nu, double lambda, int degree, int dim,
+                     int nAA, int nBB, double* RRes);
+
+  int twed_batch_devf(float AA_dev[], int nA, float TAA_dev[],
+                      float BB_dev[], int nB, float TBB_dev[],
+                      float nu, float lambda, int degree, int dim,
+                      int nAA, int nBB, float* RRes);
 
 
 #ifdef __cplusplus
 }
 #endif
-  
+
 
 #endif
