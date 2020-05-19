@@ -128,3 +128,128 @@ def twed_dev(A, TA, B, TB, nu, lamb, degree=2):
         raise RuntimeError(f"cuTWED call failed with {result}.")
 
     return result
+
+
+def twed_batch_dev(AA, TAA, BB, TBB, nu, lamb, degree=2):
+    """
+    Invokes CUDA based batch twed using ctypes wrapper.
+
+    AA, BA  : GPUArrays of time series values. size, (nAA,nA,dim) and (nBB,nA,dim
+    TA, TB: GPUArrays of corresponding time series timestamps.
+    degree: Power used in the Lp norm, default is 2.
+    nu, lamb: algo parameters.
+    """
+
+    if AA.ndim == 2:
+        AA = AA.reshape((AA.shape[0], AA.shape[1], 1))
+    elif AA.ndim != 3:
+        raise RuntimeError("Input AA should be 2D, or 3d (nAA x Time x <dim>) array.")
+
+    if BB.ndim == 2:
+        BB = BB.reshape((BB.shape[0], BB.shape[1], 1))
+    elif BB.ndim != 3:
+        raise RuntimeError("Input BB should be 2D, or 3d (nBB x Time x <dim>) array.")
+
+    nAA = AA.shape[0]
+    nA = AA.shape[1]
+    nBB = BB.shape[0]
+    nB = BB.shape[1]
+    dim = AA.shape[2]
+
+    assert dim == BB.shape[2], "AA and BB should have same 'dim'."
+    assert nAA, nA == TAA.shape
+    assert nBB, nB == TBB.shape
+    assert degree > 0
+    assert all([x.dtype == AA.dtype for x in [AA, TAA, BB, TBB]])  # Dtypes should match
+
+    RRes = np.zeros((nAA, nBB), AA.dtype)
+
+    if AA.dtype == np.float64:
+        func = lib.twed_batch_dev
+
+        RRes_ptr = ffi.cast("double *", RRes.ctypes.data)
+
+        def caster(x):
+            return ffi.cast("double *", x.gpudata)
+
+    elif AA.dtype == np.float32:
+        func = lib.twed_batch_devf
+
+        RRes_ptr = ffi.cast("float *", RRes.ctypes.data)
+
+        def caster(x):
+            return ffi.cast("float *", x.gpudata)
+
+    else:
+        raise RuntimeError("Expected inputs to be np.float32 or np.float64")
+
+    ret_code = func(caster(AA), nA, caster(TAA),
+                    caster(BB), nB, caster(TBB),
+                    nu, lamb, degree, dim,
+                    nAA, nBB, RRes_ptr)
+
+    if ret_code != 0:
+        raise RuntimeError(f"cuTWED call failed with {ret_code}.")
+
+    return RRes
+
+
+def twed_batch(AA, TAA, BB, TBB, nu, lamb, degree=2):
+    """
+    Invokes CUDA based batch twed using ctypes wrapper.
+
+    AA, BA  : Numpy C Arrays of time series values.
+              size, (nAA,nA,dim) and (nBB,nA,dim)
+    TA, TB: Numpy C Arrays of corresponding time series timestamps.
+    degree: Power used in the Lp norm, default is 2.
+    nu, lamb: algo parameters.
+    """
+
+    if AA.ndim == 2:
+        AA = AA.reshape((AA.shape[0], AA.shape[1], 1))
+    elif AA.ndim != 3:
+        raise RuntimeError("Input AA should be 2D, or 3d (nAA x Time x <dim>) array.")
+
+    if BB.ndim == 2:
+        BB = BB.reshape((BB.shape[0], BB.shape[1], 1))
+    elif BB.ndim != 3:
+        raise RuntimeError("Input BB should be 2D, or 3d (nBB x Time x <dim>) array.")
+
+    nAA = AA.shape[0]
+    nA = AA.shape[1]
+    nBB = BB.shape[0]
+    nB = BB.shape[1]
+    dim = AA.shape[2]
+
+    assert dim == BB.shape[2], "AA and BB should have same 'dim'."
+    assert nAA, nA == TAA.shape
+    assert nBB, nB == TBB.shape
+    assert degree > 0
+    assert all([x.dtype == AA.dtype for x in [AA, TAA, BB, TBB]])  # Dtypes should match
+
+    RRes = np.zeros((nAA, nBB), AA.dtype)
+
+    if AA.dtype == np.float64:
+        func = lib.twed_batch
+
+        def caster(x):
+            return ffi.cast("double *", x.ctypes.data)
+
+    elif AA.dtype == np.float32:
+        func = lib.twed_batchf
+
+        def caster(x):
+            return ffi.cast("float *", x.ctypes.data)
+
+    else:
+        raise RuntimeError("Expected inputs to be np.float32 or np.float64")
+
+    ret_code = func(caster(AA), nA, caster(TAA),
+                    caster(BB), nB, caster(TBB),
+                    nu, lamb, degree, dim,
+                    nAA, nBB, caster(RRes))
+
+    if ret_code != 0:
+        raise RuntimeError(f"cuTWED call failed with {ret_code}.")
+
+    return RRes

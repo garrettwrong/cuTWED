@@ -35,7 +35,7 @@
    I figure most commone values might be 1,2, or 3 dim...
 */
 static const int DIMENSION_LIMIT = 32;
-
+static const int BATCH_LIMIT = 65535;
 
 /*
   CUDA Utility
@@ -78,10 +78,6 @@ static __inline__ __host__ __device__ diagIdx_t map_rc_to_diag(int row, int col)
   return {row+col, col};
 }
 
-static __inline__ __device__ size_t dim_offset(size_t idx, int dim){
-  return dim*idx;
-}
-
 /*
   The core alogorithm is expanded here for doubles then single precision.
   See cuTWED_core.h
@@ -93,6 +89,8 @@ static __inline__ __device__ size_t dim_offset(size_t idx, int dim){
 #define _TWED_COPY_TO_DEV twed_copy_to_dev
 #define _TWED_DEV twed_dev
 #define _TWED twed
+#define _TWED_BATCH_DEV twed_batch_dev
+#define _TWED_BATCH twed_batch
 #include "cuTWED_core.h"
 #undef REAL_t
 #undef _TWED_MALLOC_DEV
@@ -100,6 +98,8 @@ static __inline__ __device__ size_t dim_offset(size_t idx, int dim){
 #undef _TWED_COPY_TO_DEV
 #undef _TWED_DEV
 #undef _TWED
+#undef _TWED_BATCH_DEV
+#undef _TWED_BATCH
 
 #define REAL_t float
 #define _TWED_MALLOC_DEV twed_malloc_devf
@@ -107,6 +107,8 @@ static __inline__ __device__ size_t dim_offset(size_t idx, int dim){
 #define _TWED_COPY_TO_DEV twed_copy_to_devf
 #define _TWED_DEV twed_devf
 #define _TWED twedf
+#define _TWED_BATCH_DEV twed_batch_devf
+#define _TWED_BATCH twed_batchf
 #include "cuTWED_core.h"
 #undef REAL_t
 #undef _TWED_MALLOC_DEV
@@ -114,3 +116,6 @@ static __inline__ __device__ size_t dim_offset(size_t idx, int dim){
 #undef _TWED_COPY_TO_DEV
 #undef _TWED_DEV
 #undef _TWED
+#undef _TWED_BATCH_DEV
+#undef _TWED_BATCH
+

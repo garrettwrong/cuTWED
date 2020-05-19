@@ -39,10 +39,17 @@ add_custom_target(
   VERBATIM
   )
 
+# so cffi can find it with less user intervention
+add_custom_command(
+  TARGET cuTWED POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy
+  ${CMAKE_CURRENT_BINARY_DIR}/libcuTWED.so
+  ${CMAKE_SOURCE_DIR}/cuTWED/libcuTWED.so
+  )
+
 
 # make install stuff
 install(TARGETS cuTWED DESTINATION lib)
-install(TARGETS cuTWED DESTINATION cuTWED) # so cffi can find
 install(FILES src/cuTWED.h DESTINATION include)
 install(FILES src/cuTWED_core.h DESTINATION include)
 
