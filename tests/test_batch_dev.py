@@ -13,7 +13,6 @@ from numpy.random import RandomState
 # Import the twed_dev function from cuTWED
 from cuTWED import twed_batch_dev
 
-rng = RandomState(42)
 
 # Set algo params
 nu = 1.
@@ -29,6 +28,7 @@ def generate(n=10, batch_sz=100):
     """ Generate some junk data. """
 
     # First generate the same time series uses in other tests.
+    rng = RandomState(42)
     noise1 = rng.randn(n)
 
     TA = np.arange(n, dtype=np.float64)
