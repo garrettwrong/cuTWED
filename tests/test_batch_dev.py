@@ -5,6 +5,7 @@ Demonstrates usage of twed_batch_dev cuTWED call.
 Copyright 2020 Garrett Wright, Gestalt Group LLC
 """
 import sys
+
 import numpy as np
 import pycuda.autoinit  # noqa: F401
 import pycuda.gpuarray as gpuarray
@@ -12,7 +13,6 @@ from numpy.random import RandomState
 
 # Import the twed_dev function from cuTWED
 from cuTWED import twed_batch_dev
-
 
 # Set algo params
 nu = 1.
@@ -58,6 +58,7 @@ def generate(n=10, batch_sz=100):
 
     return AA, TAA, BB, TBB, Ref
 
+
 def test_basic_batch_dev(n=10, batch_sz=100):
     """ Test calling twed_batch_dev using GPUarrays. """
 
@@ -97,12 +98,14 @@ def test_basic_batch_dev_float(n=10, batch_sz=100):
     if n == 10:
         assert np.allclose(Ref, Res)
 
+
 if __name__ == "__main__":
-    if len(sys.argv)>3:
+    # Probably should just bring in argparse next time.
+    if len(sys.argv) > 3:
         raise RuntimeError(f"Usage ./{sys.argv[0]} <n> <batch_sz>")
-    elif len(sys.argv)==3:
+    elif len(sys.argv) == 3:
         test_basic_batch_dev(n=int(sys.argv[1]), batch_sz=int(sys.argv[2]))
-    elif len(sys.argv)==2:
+    elif len(sys.argv) == 2:
         test_basic_batch_dev(n=int(sys.argv[1]))
     else:
         test_basic_batch_dev()
