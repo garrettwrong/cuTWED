@@ -14,6 +14,7 @@ include README.md
 include pyproject.toml
 
 include tox.ini
+include conftest.py
 include .readthedocs.yml
 include *.yml
 #.appveyor.yml .pre-commit-config.yaml

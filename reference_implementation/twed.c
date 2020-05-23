@@ -141,7 +141,15 @@ void CTWED(double ta[], int *la, double tsa[],
         if(i>1&&j>1)
           (*dist)+=pow(fabs(ta[(i-2)*dim + n]-tb[(j-2)*dim + n]),deg);
       }
-      D[i][j]=*dist;
+      // NOTE original author did not nth-root
+      if(*degree<0){      // I provide "no root" as negative degree, to match any prior results
+        D[i][j]=*dist;    // Consider it a semi hidden feature.
+      } else if(deg==2){
+        D[i][j]=sqrt(*dist);
+      }
+      else D[i][j]=pow(*dist, 1./deg);
+
+
     }
   } // for i
 
