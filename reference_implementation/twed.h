@@ -70,4 +70,4 @@
 void CTWED(double ta[], int *la, double tsa[],
            double tb[], int *lb, double tsb[],
            double *nu, double *lambda, int *degree,
-           double *dist, int* dimension);
+           double *dist, int *dimension);

@@ -16,7 +16,6 @@ You should have received a copy of the GNU General Public License
 along with cuTWED.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-from ctypes import c_double
 
 import numpy as np
 from _CTWED import ffi
@@ -70,10 +69,32 @@ def ctwed(A, TA, B, TB, nu, lamb, degree=2):
     else:
         raise NotImplementedError("Reference CTWED is doubles (float64) only.")
 
-    res = c_double(-1)
-    func(caster(A), ffi.cast("int *", nA), caster(TA),
-         caster(B), ffi.cast("int *", nB), caster(TB),
-         ffi.cast("int *", nu), ffi.cast("int *", lamb),
-         ffi.cast("int *", degree), ffi.cast("double *", res), ffi.cast("int *", dim))
+    # Starting to think ctypes was, and remains, way better.
+    la_ptr = ffi.new("int *")
+    la_ptr[0] = nA
+    lb_ptr = ffi.new("int *")
+    lb_ptr[0] = nB
+    nu_ptr = ffi.new("double *")
+    nu_ptr[0] = nu
+    lambda_ptr = ffi.new("double *")
+    lambda_ptr[0] = lamb
+    degree_ptr = ffi.new("int *")
+    degree_ptr[0] = degree
+    dim_ptr = ffi.new("int *")
+    dim_ptr[0] = dim
+    res_ptr = ffi.new("double *")
+    res_ptr[0] = -1
 
-    return res
+    func(caster(A),
+         la_ptr,
+         caster(TA),
+         caster(B),
+         lb_ptr,
+         caster(TB),
+         nu_ptr,
+         lambda_ptr,
+         degree_ptr,
+         res_ptr,
+         dim_ptr)
+
+    return res_ptr[0]

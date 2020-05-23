@@ -38,7 +38,6 @@ ffibuilder.set_source(
     #include "twed.h"   // the C header of the library
     """,
     sources=[os.path.join('reference_implementation', 'twed.c')],
-    source_dirs=['reference_implementation'],
     include_dirs=['reference_implementation'],
     libraries=['m'],   # shared library names, for the linker
 )
