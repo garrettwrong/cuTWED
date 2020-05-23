@@ -5,8 +5,8 @@ Demonstates basic cuTWED usage
 Copyright 2020 Garrett Wright, Gestalt Group LLC
 """
 
-import pytest
 import numpy as np
+import pytest
 from numpy.random import RandomState
 
 # Import the twed function from cuTWED
