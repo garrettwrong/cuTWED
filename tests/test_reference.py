@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Demonstates basic cuTWED usage
+Demonstates basic cTWED usage
 
 Copyright 2020 Garrett Wright, Gestalt Group LLC
 """
