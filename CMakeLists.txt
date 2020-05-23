@@ -21,7 +21,7 @@ target_link_libraries(testf.x cuTWED)
 
 add_library(twed SHARED reference_implementation/twed.c)
 add_executable(twed.x reference_implementation/twed_test.c)
-target_link_libraries(twed.x m)
+target_link_libraries(twed m)
 target_link_libraries(twed.x twed)
 
 # CMake doens't appear to grok the cu files as well as C, sigh, help it out

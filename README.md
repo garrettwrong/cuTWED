@@ -31,7 +31,7 @@ It admits input time series in `R^N` as arrays of N-dimensional arrays in C-orde
 For typical problems computable by the original TWED implementation,
 utilizing cuTWED and thousands of CUDA cores achieves great speedups.
 For common problems speedups are one to two orders of magnitude,
-capable of achieving 200x acceleration on the P100 GPUs in doubles.
+capable of achieving 200x acceleration on a P100 GPUs in doubles.
 More so, the linear memory footprint allows for the computation
 of previously intractable problems.  Large problems, large systems
 of inputs can be computed much more effectively now.
@@ -46,8 +46,7 @@ The minor changes are an extra argument `dimension` to admit `R^N` inputs,
 and more common handling of norm (nth-root).  These modications
 were made to facilitate refence testing cuTWED and also make the original code more general.
 
-`ctwed` is also included those machines that are lacking a CUDA card and find other
-implementations too slow.
+`ctwed` is also included for users without a CUDA card who find other implementations too slow.
 
 ## Getting Started
 
