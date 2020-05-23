@@ -30,7 +30,8 @@ nu = 1.
 lamb = 1.
 degree = 2
 
-reference_result = 54.827250
+original_reference_result = 58.981692
+reference_result = 51.294762
 
 
 def test_basic_call():
@@ -41,6 +42,16 @@ def test_basic_call():
     print('Python CTWED distance: {:f}'.format(dist))
 
     assert np.allclose(dist, reference_result)
+
+
+def test_repro_call():
+    """ Test calling twed """
+    repro_degree = -2    # repro Marteau's original code.
+    dist = ctwed(A, TA, B, TB, nu, lamb, repro_degree)
+
+    print('Python CTWED distance: {:f}'.format(dist))
+
+    assert np.allclose(dist, original_reference_result)
 
 
 def test_basic_call_float():
