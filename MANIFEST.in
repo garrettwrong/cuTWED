@@ -5,8 +5,6 @@ graft tests
 
 include .bumpversion.cfg
 include .coveragerc
-#include .cookiecutterrc
-#include .editorconfig
 
 include AUTHORS.rst
 include CHANGELOG.rst
@@ -17,6 +15,7 @@ include pyproject.toml
 
 include tox.ini
 include .readthedocs.yml
+include .gitlab-ci.yml
 #.appveyor.yml .pre-commit-config.yaml
 
 include *.txt
