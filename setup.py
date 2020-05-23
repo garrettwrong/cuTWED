@@ -100,5 +100,5 @@ setup(
         'cffi>=1.0.0',
     ],
     cffi_modules=[i + ':ffibuilder' for i in glob('cuTWED/_*_build.py')],
-    headers=['cuTWED/cuTWED.h.i'],
+    headers=['cuTWED/cuTWED.h.i', 'reference_implementation/twed.h'],
 )

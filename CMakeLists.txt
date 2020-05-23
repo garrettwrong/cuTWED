@@ -14,15 +14,17 @@ include_directories(src)
 cuda_add_library(cuTWED SHARED src/cuTWED.cu)
 
 cuda_add_executable(test.x tests/test.cu)
-target_link_libraries(test.x cuTWED )
+target_link_libraries(test.x cuTWED)
 
 cuda_add_executable(testf.x tests/testf.cu)
-target_link_libraries(testf.x cuTWED )
+target_link_libraries(testf.x cuTWED)
 
-cuda_add_executable(twed.x reference_implementation/twed.c)
+add_library(twed SHARED reference_implementation/twed.c)
+add_executable(twed.x reference_implementation/twed_test.c)
+target_link_libraries(twed.x m)
+target_link_libraries(twed.x twed)
 
 # CMake doens't appear to grok the cu files as well as C, sigh, help it out
-## I don't actually use this atm... but its there...
 add_custom_command(
   OUTPUT cuTWED.h.i
   COMMAND "${CMAKE_C_COMPILER}" -P -E "${CMAKE_CURRENT_SOURCE_DIR}/src/cuTWED.h" -o "${CMAKE_CURRENT_SOURCE_DIR}/cuTWED/cuTWED.h.i"
