@@ -16,7 +16,7 @@
 /*
   Filename: twed.h
   source code for the Time Warp Edit Distance in ANSI C.
-  Author: Pierre-Francois Marteau, adapted for R integration by Jörg Schaber
+  Author: Pierre-Francois Marteau, adapted for R integration by Jorg Schaber
   Version: V1.2.a du 25/08/2014, radix addition line 101, thanks to Benjamin Herwig from University of Kassel, Germany
   Licence: GPL
   ******************************************************************
