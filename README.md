@@ -41,7 +41,7 @@ Some speed comparisons and a more formal white paper will follow.
 ### Reference Implementation
 
 Marteau's original code with a some minor changes has been included in this package.
-It is build both as a C library and with python cffi bindings `cuTWED.ctwed`.
+It is built both as a C library and part of the python package  `cuTWED.ctwed`.
 The minor changes are an extra argument `dimension` to admit `R^N` inputs,
 and more common handling of norm (nth-root).  These modications
 were made to facilitate refence testing cuTWED and also make the original code more general.
@@ -103,13 +103,13 @@ export LD_LIBRARY_PATH=$PWD:$LD_LIBRARY_PATH
 ```
 
 #### Python
-Once you have the CUDA C library readied, we can use `pip` for the python bindings.
+Once you have the CUDA C library readied, we can use `pip` for the python bindings. From the root of the git repo:
 
 ```
 pip install .
 ```
 
-If you are a developer you might prefer pip install in local editable mode instead.
+If you are planning to edit the code, youmight prefer pip install in local editable mode instead.
 ```
 pip install -e .
 ```
@@ -157,7 +157,10 @@ I have also provided malloc, copy, and free helpers in case it makes sense to re
 See `cuTWED.h`.
 _All logic and size checks for such advanced cases are expected to be owned by the user._
 
-Future plans include a mode for streaming batched mode optimized for large systems.
+There is an additional batch method.  Until I have a chance to right up better documentation,
+you may find example use in `test_batch`, `test_batch_dev`, and a small but respectable ML batch problem set in `test_synthetic_validation.py`.
+
+Future plans include optimization and multi-gpu options for large batches..
 
 #### Python
 
@@ -176,6 +179,20 @@ Examples in double and single precision are in `tests/test_basic_dev.py`.
 ```
 from cuTWED import twed_dev
 ```
+
+The batch interfaces are `twed_batch` and `twed_batch_dev` respectively.  Currently it is doing a barbaric synchonization.  I have a branch using streams with events, but I need to validate it is robust before I push it. That gives back about another 20% in batch mode afaict.
+
+If you want to run Marteau's C code from Python you can try `ctwed`. For very small problems you may find his original C code is faster.
+
+## Troubleshooting and Known Issues
+
+This software is early in its life cycle. The following are known issues:
+
+* Portability, I expect you have linux at this time.
+* I have not had time to profile or optimize it, there are things I know to have improvements.
+* The python packaging requires you have the CUDA code locally or system installed.  When I surveyed the options to due this via python packaging, I didn't like any of the options. Still considering...
+
+If you find an issue or bug with the code, please submit an issue.  More details about this can be found in the contributing document.
 
 ## License
 
