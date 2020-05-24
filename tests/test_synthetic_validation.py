@@ -14,12 +14,12 @@ Copyright 2020 Garrett Wright, Gestalt Group LLC
 
 from timeit import default_timer as timer
 
-import matplotlib.pylab as plt
+# import matplotlib.pylab as plt
 import numpy as np
 import pycuda.autoinit  # noqa: F401
 import pycuda.gpuarray as gpuarray
 import pytest
-import seaborn as sns
+# import seaborn as sns
 from tqdm import tqdm
 
 # Import functions from cuTWED
@@ -76,9 +76,9 @@ def test_ref():
     with open(f'{name}.npy', 'wb') as fh:
         np.save(fh, DistanceMatrix)
 
-    with sns.axes_style("white"):
-        sns.heatmap(DistanceMatrix, square=True,  cmap="YlGnBu")
-        plt.savefig(f'{name}.png')
+    # with sns.axes_style("white"):
+    #     sns.heatmap(DistanceMatrix, square=True,  cmap="YlGnBu")
+    #     plt.savefig(f'{name}.png')
 
     return DistanceMatrix
 
@@ -101,9 +101,9 @@ def test_cutwed():
     with open(f'{name}.npy', 'wb') as fh:
         np.save(fh, DistanceMatrix)
 
-    with sns.axes_style("white"):
-        sns.heatmap(DistanceMatrix, square=True,  cmap="YlGnBu")
-        plt.savefig(f'{name}.png')
+    # with sns.axes_style("white"):
+    #     sns.heatmap(DistanceMatrix, square=True,  cmap="YlGnBu")
+    #     plt.savefig(f'{name}.png')
 
     return DistanceMatrix
 
@@ -126,9 +126,9 @@ def test_cutwed_dev():
     with open(f'{name}.npy', 'wb') as fh:
         np.save(fh, DistanceMatrix)
 
-    with sns.axes_style("white"):
-        sns.heatmap(DistanceMatrix, square=True,  cmap="YlGnBu")
-        plt.savefig(f'{name}.png')
+    # with sns.axes_style("white"):
+    #     sns.heatmap(DistanceMatrix, square=True,  cmap="YlGnBu")
+    #     plt.savefig(f'{name}.png')
 
     return DistanceMatrix
 
@@ -143,9 +143,9 @@ def test_batch():
     with open(f'{name}.npy', 'wb') as fh:
         np.save(fh, DistanceMatrix)
 
-    with sns.axes_style("white"):
-        sns.heatmap(DistanceMatrix, square=True,  cmap="YlGnBu")
-        plt.savefig(f'{name}.png')
+    # with sns.axes_style("white"):
+    #     sns.heatmap(DistanceMatrix, square=True,  cmap="YlGnBu")
+    #     plt.savefig(f'{name}.png')
 
     return DistanceMatrix
 
@@ -160,9 +160,9 @@ def test_batch_dev():
     with open(f'{name}.npy', 'wb') as fh:
         np.save(fh, DistanceMatrix)
 
-    with sns.axes_style("white"):
-        sns.heatmap(DistanceMatrix, square=True,  cmap="YlGnBu")
-        plt.savefig(f'{name}.png')
+    # with sns.axes_style("white"):
+    #     sns.heatmap(DistanceMatrix, square=True,  cmap="YlGnBu")
+    #     plt.savefig(f'{name}.png')
 
     return DistanceMatrix
 
