@@ -2,7 +2,7 @@
 """
 Validates CTWED and cuTWED with a well known synthetic control dataset:
 
-http://archive.ics.uci.edu/ml/datasets/Pseudo+Periodic+Synthetic+Time+Series
+http://archive.ics.uci.edu/ml/datasets/Synthetic+Control+Chart+Time+Series
 
 We compare the all-pairs distance matrix as computed by
 several cuTWED implementations with Marteau's reference code.
