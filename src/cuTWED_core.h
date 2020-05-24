@@ -412,7 +412,7 @@ extern "C" {
              "  If encountered during units tests, this is probably safe to ignore, (different stream).\n" \
              "  If that was not a mistake, you may change DIMENSION_LIMIT and recomplile. Exiting.\n",
              dim, DIMENSION_LIMIT);
-      return -1.;
+      return -2.;
     }
 
     const int nstreams = 2;
@@ -504,12 +504,12 @@ extern "C" {
     /*
       Sanity Check
     */
-    if(nB > BATCH_LIMIT || nA > BATCH_LIMIT){
-      printf("Error, a supplied batch dimension nAA %d nBB %d is greater than BATCH_LIMIT %d.\n" \
+    if(nBB > BATCH_LIMIT || nAA > BATCH_LIMIT){
+      fprintf(stderr, "Error, a supplied batch dimension nAA %d nBB %d is greater than BATCH_LIMIT %d.\n" \
              "  If encountered during units tests, this is probably safe to ignore, (different stream).\n" \
              "  Try running a few batches instead of one large one.",
              nAA, nBB, BATCH_LIMIT);
-      return -1;
+      return -BATCH_LIMIT;
     }
 
 
@@ -517,11 +517,11 @@ extern "C" {
       Sanity Check Dimension
     */
     if(dim > DIMENSION_LIMIT){
-      printf("Error, supplied dimension %d is greater than compiled DIMENSION_LIMIT %d.\n" \
+      fprintf(stderr, "Error, supplied dimension %d is greater than compiled DIMENSION_LIMIT %d.\n" \
              "  If encountered during units tests, this is probably safe to ignore, (different stream).\n" \
              "  If that was not a mistake, you may change DIMENSION_LIMIT and recomplile. Exiting.\n",
              dim, DIMENSION_LIMIT);
-      return -1;
+      return -DIMENSION_LIMIT;
     }
 
     const int nstreams = 2;
