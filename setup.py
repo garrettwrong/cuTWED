@@ -66,9 +66,7 @@ setup(
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
     ],
     tests_require=['pytest',
-                   'ipywidgets >= 7.5.1',
-                   'matplotlib',
-                   'tqdm'],
+                   'ipywidgets >= 7.5.1'],
     project_urls={
         'Documentation': 'https://cuTWED.readthedocs.io/',
         'Changelog': 'https://cuTWED.readthedocs.io/en/latest/changelog.html',
@@ -82,6 +80,7 @@ setup(
         'cffi>=1.0.0',
         'numpy',
         'pycuda',
+        'tqdm',
     ],
     extras_require={
         'dev': ['tox',
@@ -94,7 +93,6 @@ setup(
                 'isort',
                 'ipywidgets >= 7.5.1',
                 'seaborn',
-                'tqdm',
                 'recommonmark',
                 'sphinx_rtd_theme',
                 'twine >= 1.12.0'],
