@@ -1,0 +1,87 @@
+<!------------------------------------------------------------------------
+<!  Synthetic Control Chart Time Series 
+<!----------------------------------------------------------------------->
+<HTML>
+<HEAD>
+<!-- Title entry -->
+<TITLE>Synthetic Control Chart Time Series</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+
+<!------------------------------------------------------------------------
+<!  Title 
+<!----------------------------------------------------------------------->
+<H1>Synthetic Control Chart Time Series</H1>
+
+<!------------------------------------------------------------------------
+<!  Task Type
+<!----------------------------------------------------------------------->
+<H2>Task Type</H2>
+clustering
+
+<!------------------------------------------------------------------------
+<!  Sources 
+<!----------------------------------------------------------------------->
+<H2> Sources</H2>
+<H4> Donor</H4>
+<PRE>
+Eamonn Keogh
+Department of Information and Computer Science
+University of California, Irvine
+Irvine, CA, 92697-3425
+<A HREF="mailto:eamonn@ics.uci.edu">eamonn@ics.uci.edu</A>
+</PRE>
+<B>Date Donated: </B>June 14, 1999
+
+<!------------------------------------------------------------------------
+<!  Problem Description
+<!----------------------------------------------------------------------->
+<H2> Problem Description</H2>
+
+<H4> Analysis Task</H4>
+Clustering the control charts. 
+
+<!------------------------------------------------------------------------
+<!  Other Relevant Information 
+<!----------------------------------------------------------------------->
+<H2> Other Relevant Information</H2>
+This is a good data set to test time series clustering (and classification)
+algorithms because Euclidean distance will not be able to
+achieve perfect accuracy. In particular the following pairs of classes
+will often be confused (Normal/Cyclic) (Decreasing trend/Downward shift)
+and (Increasing trend/ Upward shift).
+
+<!------------------------------------------------------------------------
+<!  Results 
+<!----------------------------------------------------------------------->
+<H2> Results</H2>
+<P>
+The following image shows a subset of the results for grouped average hierarchical clustering on this dataset. Each class is represented by a distinct color. The left column shows the results by using Euclidean Distance and the right column shows the results for Derivative Dynamic Time Warping (DDTW, Keogh and Pazzani). DDTW correctly found the six high-level groups, but Euclidean distance did not. 
+</P>
+<img src="cluster.jpeg" align="center"/>
+<BR d=""/>
+(Green) Downward Trend.  (Blue) Cyclic.  (Red) Normal.  (Yellow) Upward Shift.  (Purple) Upward Trend.  (Black) Downward Shift.
+
+
+<!------------------------------------------------------------------------
+<!  References 
+<!----------------------------------------------------------------------->
+<H2>References and Further Information</H2>
+<p>
+E. Keogh and M. J. Pazzani. Derivative Dynamic Time Warping. Technical Report.
+</p>
+
+<!------------------------------------------------------------------------
+<!  Signature 
+<!----------------------------------------------------------------------->
+<p>
+<hr>
+<ADDRESS>
+<A href="http://kdd.ics.uci.edu/">The UCI KDD Archive</A><br>
+<a href="http://www.ics.uci.edu/">Information and Computer Science</a><br>
+<a href="http://www.uci.edu/">University of California, Irvine</a><br>
+Irvine, CA 92697-3425 <br>
+</ADDRESS> 
+Last modified: June 14, 1999 </BODY>
+</HTML>
+
