@@ -194,7 +194,7 @@ have also provided malloc, copy, and free helpers in case it makes sense
 to reuse memory. See ``cuTWED.h``. *All logic and size checks for such
 advanced cases are expected to be owned by the user.*
 
-There is an additional batch method. Until I have a chance to right up
+There is an additional batch method. Until I have a chance to write up
 better documentation, you may find example use in ``test_batch``,
 ``test_batch_dev``, and a small but respectable ML batch problem set in
 ``test_synthetic_validation.py``.
