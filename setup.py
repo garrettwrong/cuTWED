@@ -85,7 +85,6 @@ setup(
                 'isort',
                 'ipywidgets >= 7.5.1',
                 'seaborn',
-                'recommonmark',
                 'sphinx_rtd_theme',
                 'twine >= 1.12.0'],
     },

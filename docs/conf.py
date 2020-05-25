@@ -11,11 +11,9 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
-    'recommonmark',
 ]
 source_suffix = {
     '.rst': 'restructuredtext',
-    '.md': 'markdown',
 }
 master_doc = 'index'
 project = 'cuTWED'
@@ -47,5 +45,3 @@ html_short_title = '%s-%s' % (project, version)
 napoleon_use_ivar = True
 napoleon_use_rtype = False
 napoleon_use_param = False
-
-autodoc_mock_imports = ['cuTWED']
