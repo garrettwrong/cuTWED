@@ -17,7 +17,7 @@ page <https://en.wikipedia.org/wiki/Time_Warp_Edit_Distance>`__.
 
 The original TWED algorithm is ``O(n^2)`` in time and space. This
 algorithm is roughly ``O(n * n/p)`` in time for p (CUDA) cores. Most
-importantly, cuTWED is linear in memory, requiring storage for roughly
+importantly, cuTWED is linear in memory, using storage for roughly
 ``6*nA + 6*nB`` elements.
 
 In the process of understanding the dynamic program data dependencies in
@@ -41,7 +41,7 @@ linear memory footprint allows for the computation of previously
 intractable problems. Large problems, large systems of inputs can be
 computed much more effectively now.
 
-Some speed comparisons and a more formal white paper will follow.
+Some speed comparisons and a more formal paper will follow.
 
 Reference Implementation
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -199,6 +199,9 @@ better documentation, you may find example use in ``test_batch``,
 ``test_batch_dev``, and a small but respectable ML batch problem set in
 ``test_synthetic_validation.py``.
 
+I have included a Jupyter Notebook which demonstrates validation
+using the `UCI Pseudo Periodic Synthetic Time Series Data Set <http://archive.ics.uci.edu/ml/datasets/Pseudo+Periodic+Synthetic+Time+Series>`__. This is a much large dataset.
+
 Future plans include optimization and multi-gpu options for large
 batches..
 
@@ -242,6 +245,9 @@ issues:
 -  Portability, I expect you have linux at this time.
 -  I have not had time to profile or optimize it, there are things I
    know to have improvements.
+-  Notably, the batch method computes the entire batch matrix,
+   not upper/lower triangle.  I have not had a chance validate the patches.
+   This would be a further speedup...
 -  The python packaging requires you have the CUDA code locally or
    system installed. When I surveyed the options to due this via python
    packaging, I didn't like any of the options. Still considering...
