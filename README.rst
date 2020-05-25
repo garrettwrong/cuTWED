@@ -274,7 +274,7 @@ Copyright 2020 Garrett Wright, Gestalt Group LLC
    :target: https://doi.org/10.5281/zenodo.3842261
 .. |GPLv3 license| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: http://perso.crans.org/besson/LICENSE.html
-.. |GitHub release| image:: https://img.shields.io/github/release/Naereen/StrapDown.js.svg
+.. |GitHub release| image:: https://img.shields.io/github/release/garrettwrong/cuTWED.svg
    :target: https://GitHub.com/garrettwrong/cuTWED/releases/
 .. |Open Source Love svg1| image:: https://badges.frapsoft.com/os/v1/open-source.svg?v=103
    :target: https://github.com/ellerbrock/open-source-badges/
