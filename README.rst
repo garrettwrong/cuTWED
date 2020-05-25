@@ -248,8 +248,8 @@ issues:
 -  Notably, the batch method computes the entire batch matrix,
    not upper/lower triangle.  I have not had a chance validate the patches.
    This would be a further speedup...
--  The python packaging requires you have the CUDA code locally or
-   system installed. When I surveyed the options to due this via python
+-  The python packaging requires you have the CUDA library locally or
+   system installed. When I surveyed the options that permit this via python
    packaging, I didn't like any of the options. Still considering...
 
 If you find an issue or bug with the code, please submit an issue. More
