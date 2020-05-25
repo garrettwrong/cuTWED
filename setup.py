@@ -24,7 +24,7 @@ def read(*names, **kwargs):
 
 
 # Parse the README
-with open("README.md", 'r') as fh:
+with open("README.rst", 'r') as fh:
     long_description = fh.read()
 
 # Enable code coverage for C code: we can't use CFLAGS=-coverage in tox.ini, since that may mess with compiling
