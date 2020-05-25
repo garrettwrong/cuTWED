@@ -388,7 +388,7 @@ extern "C" {
     HANDLE_ERROR(cudaMemcpy(A_dev, A, sza*dim, cudaMemcpyHostToDevice));
     HANDLE_ERROR(cudaMemcpy(TA_dev, TA, sza, cudaMemcpyHostToDevice));
 
-    const size_t szb = nBB*nB*dim*sizeof(*B);
+    const size_t szb = nBB*nB*sizeof(*B);
     HANDLE_ERROR(cudaMemcpy(B_dev, B , szb*dim, cudaMemcpyHostToDevice));
     HANDLE_ERROR(cudaMemcpy(TB_dev, TB, szb, cudaMemcpyHostToDevice));
   }
