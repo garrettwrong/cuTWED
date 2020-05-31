@@ -104,7 +104,8 @@ void CTWED(double ta[], int *la, double tsa[],
     distj1=0;
     for(n=0; n<dim; n++){
       if(j>1){
-        distj1+=pow(fabs(tb[(j-2)*dim + n]-tb[(j-1) + n]),deg);
+        distj1+=pow(fabs(tb[(j-2)*dim + n] -
+                         tb[(j-1)*dim + n]),deg);
       }
       else distj1+=pow(fabs(tb[(j-1)*dim + n]),deg);
     }
@@ -122,7 +123,8 @@ void CTWED(double ta[], int *la, double tsa[],
     disti1=0;
     for(n=0; n<dim; n++){
       if(i>1)
-        disti1+=pow(fabs(ta[(i-2)*dim + n]-ta[(i-1)*dim + n]),deg);
+        disti1+=pow(fabs(ta[(i-2)*dim + n] -
+                         ta[(i-1)*dim + n]),deg);
       else disti1+=pow(fabs(ta[(i-1)*dim + n]),deg);
     }
 
@@ -136,18 +138,22 @@ void CTWED(double ta[], int *la, double tsa[],
 
     for(j=1; j<=c; j++) {
       (*dist)=0;
+      dist0 = 0;
       for(n=0; n<dim; n++){
-        (*dist)+=pow(fabs(ta[(i-1)*dim + n]-tb[(j-1)*dim + n]),deg);
+        *(dist)+=pow(fabs(ta[(i-1)*dim + n] -
+                          tb[(j-1)*dim + n]),deg);
         if(i>1&&j>1)
-          (*dist)+=pow(fabs(ta[(i-2)*dim + n]-tb[(j-2)*dim + n]),deg);
+          dist0 += pow(fabs(ta[(i-2)*dim + n] -
+                            tb[(j-2)*dim + n]),deg);
       }
+
       // NOTE original author did not nth-root
       if(*degree<0){      // I provide "no root" as negative degree, to match any prior results
-        D[i][j]=*dist;    // Consider it a semi hidden feature.
+        D[i][j]=*dist + dist0;    // Consider it a semi hidden feature.
       } else if(deg==2){
-        D[i][j]=sqrt(*dist);
+        D[i][j]=sqrt(*dist) + sqrt(dist0);
       }
-      else D[i][j]=pow(*dist, 1./deg);
+      else D[i][j]=pow(*dist, 1./deg) + pow(dist0, 1./deg);
 
 
     }
@@ -166,8 +172,10 @@ void CTWED(double ta[], int *la, double tsa[],
       htrans=fabs((double)(tsa[i-1]-tsb[j-1]));
       if(j>1&&i>1)
         htrans+=fabs((double)(tsa[i-2]-tsb[j-2]));
-      dist0=D[i-1][j-1]+D[i][j]+(*nu)*htrans;
+        dist0=D[i-1][j-1]+D[i][j]+(*nu)*htrans;
+
       dmin=dist0;
+
       if(i>1)
         htrans=((double)(tsa[i-1]-tsa[i-2]));
       else htrans=(double)tsa[i-1];
