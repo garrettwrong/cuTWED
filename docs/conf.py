@@ -20,7 +20,7 @@ project = 'cuTWED'
 year = '2020'
 author = 'Garrett Wright'
 copyright = '{0}, {1}'.format(year, author)
-version = release = '1.0.2'
+version = release = '1.1.0'
 
 pygments_style = 'trac'
 templates_path = ['.']
