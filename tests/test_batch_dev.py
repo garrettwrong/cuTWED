@@ -20,8 +20,8 @@ lamb = 1.
 degree = 2
 
 # Expected results
-reference_result_a_b = 51.294762
-reference_result_a_0 = 38.310909
+reference_result_a_b = 54.54317
+reference_result_a_0 = 44.739147
 
 
 def generate(n=10, batch_sz=100):

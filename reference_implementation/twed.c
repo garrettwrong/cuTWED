@@ -172,7 +172,7 @@ void CTWED(double ta[], int *la, double tsa[],
       htrans=fabs((double)(tsa[i-1]-tsb[j-1]));
       if(j>1&&i>1)
         htrans+=fabs((double)(tsa[i-2]-tsb[j-2]));
-        dist0=D[i-1][j-1]+D[i][j]+(*nu)*htrans;
+      dist0=D[i-1][j-1]+D[i][j]+(*nu)*htrans;
 
       dmin=dist0;
 

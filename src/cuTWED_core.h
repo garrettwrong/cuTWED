@@ -76,7 +76,9 @@ __global__ void local_distance_kernel(const REAL_t* __restrict__ X, const int n,
     d = lpnorm(degree, dim, &X[bat*n*dim + (tid-1)*dim]);
   }
   else {
-    vsub(dim, &X[bat*n*dim + (tid-1)*dim], &X[bat*n*dim + (tid-2)*dim], tmp);
+    vsub(dim,
+         &X[bat*n*dim + (tid-1)*dim],
+         &X[bat*n*dim + (tid-2)*dim], tmp);
     d = lpnorm(degree, dim, tmp);
   }
 
@@ -129,6 +131,9 @@ __global__ void evalZ_kernel(int diagIdx,
   */
   int i;
   REAL_t d;
+  REAL_t d2;
+  const REAL_t recip = (REAL_t)1. / degree;
+
   if(row==0 && col==0){
     d = 0;
   } else if(row==0 || col==0){
@@ -137,13 +142,14 @@ __global__ void evalZ_kernel(int diagIdx,
   else{
 
     d=0;
+    d2=0;
     for(i=0; i<dim; i++){
       d += pow( fabs( A[(row - 1)*dim + i] - Bptr[(col - 1)*dim + i]), degree);
       if(row>1 && col>1){
-        d += pow( fabs( A[(row - 2)*dim + i] - Bptr[(col - 2)*dim + i]), degree);
+        d2 += pow( fabs( A[(row - 2)*dim + i] - Bptr[(col - 2)*dim + i]), degree);
       }
     }
-    d = pow(d, (REAL_t)1./degree);
+    d = pow(d, recip) + pow(d2, recip);
   }
 
   //DBG printf("d [%d] = %f;\n", tid, d);
