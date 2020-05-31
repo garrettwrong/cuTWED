@@ -29,7 +29,7 @@ nu = 1.
 lamb = 1.
 degree = 2
 
-reference_result = 50301.468182631244
+reference_result = 55074.428733
 
 
 def test_large_call():

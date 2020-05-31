@@ -31,7 +31,7 @@ lamb = 1.
 degree = 2
 
 original_reference_result = 58.981692
-reference_result = 51.294762
+reference_result = 54.54317
 
 
 def test_basic_call():
