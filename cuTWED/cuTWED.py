@@ -130,7 +130,7 @@ def twed_dev(A, TA, B, TB, nu, lamb, degree=2):
     return result
 
 
-def twed_batch_dev(AA, TAA, BB, TBB, nu, lamb, degree=2):
+def twed_batch_dev(AA, TAA, BB, TBB, nu, lamb, degree=2, tri=0):
     """
     Invokes CUDA based batch twed using ctypes wrapper.
 
@@ -186,7 +186,7 @@ def twed_batch_dev(AA, TAA, BB, TBB, nu, lamb, degree=2):
     ret_code = func(caster(AA), nA, caster(TAA),
                     caster(BB), nB, caster(TBB),
                     nu, lamb, degree, dim,
-                    nAA, nBB, RRes_ptr)
+                    nAA, nBB, RRes_ptr, tri)
 
     if ret_code != 0:
         raise RuntimeError(f"cuTWED call failed with {ret_code}.")
@@ -194,7 +194,7 @@ def twed_batch_dev(AA, TAA, BB, TBB, nu, lamb, degree=2):
     return RRes
 
 
-def twed_batch(AA, TAA, BB, TBB, nu, lamb, degree=2):
+def twed_batch(AA, TAA, BB, TBB, nu, lamb, degree=2, tri=0):
     """
     Invokes CUDA based batch twed using ctypes wrapper.
 
@@ -247,7 +247,7 @@ def twed_batch(AA, TAA, BB, TBB, nu, lamb, degree=2):
     ret_code = func(caster(AA), nA, caster(TAA),
                     caster(BB), nB, caster(TBB),
                     nu, lamb, degree, dim,
-                    nAA, nBB, caster(RRes))
+                    nAA, nBB, caster(RRes), tri)
 
     if ret_code != 0:
         raise RuntimeError(f"cuTWED call failed with {ret_code}.")

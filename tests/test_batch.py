@@ -81,3 +81,15 @@ def test_basic_batch_float():
     print(Res)
     # print("Ref\n",Ref)
     assert np.allclose(Ref, Res)
+
+def test_basic_batch_tril():
+    """ Test calling twed_batch using GPUarrays. """
+
+    # Call TWED
+    Res = twed_batch(AA, TAA, BB, TBB, nu, lamb, degree, tri=-1)
+
+    print('Python Device Batch cuTWED distances tril:')
+    print(Res)
+    # print("Ref\n",Ref)
+    lower_tri = np.tril(Ref,-1)
+    assert np.allclose(lower_tri, Res)
