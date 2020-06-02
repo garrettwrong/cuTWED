@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include "cublas_v2.h"
 
 #include "cuTWED.h"
 
@@ -49,7 +50,40 @@ static inline void gpuAssert(cudaError_t code, const char *file, int line, bool 
     if (abort) exit(code);
   }
 }
+#ifdef CUBLAS_API_H_
+// cuBLAS API errors
+static const char *_cudaGetErrorEnum(cublasStatus_t error)
+{
+    switch (error)
+    {
+        case CUBLAS_STATUS_SUCCESS:
+            return "CUBLAS_STATUS_SUCCESS";
 
+        case CUBLAS_STATUS_NOT_INITIALIZED:
+            return "CUBLAS_STATUS_NOT_INITIALIZED";
+
+        case CUBLAS_STATUS_ALLOC_FAILED:
+            return "CUBLAS_STATUS_ALLOC_FAILED";
+
+        case CUBLAS_STATUS_INVALID_VALUE:
+            return "CUBLAS_STATUS_INVALID_VALUE";
+
+        case CUBLAS_STATUS_ARCH_MISMATCH:
+            return "CUBLAS_STATUS_ARCH_MISMATCH";
+
+        case CUBLAS_STATUS_MAPPING_ERROR:
+            return "CUBLAS_STATUS_MAPPING_ERROR";
+
+        case CUBLAS_STATUS_EXECUTION_FAILED:
+            return "CUBLAS_STATUS_EXECUTION_FAILED";
+
+        case CUBLAS_STATUS_INTERNAL_ERROR:
+            return "CUBLAS_STATUS_INTERNAL_ERROR";
+    }
+
+    return "<unknown>";
+}
+#endif
 
 /*
   These are just some helper utilities,
@@ -91,6 +125,7 @@ static __inline__ __host__ __device__ diagIdx_t map_rc_to_diag(int row, int col)
 #define _TWED twed
 #define _TWED_BATCH_DEV twed_batch_dev
 #define _TWED_BATCH twed_batch
+#define _GEAM cublasDgeam
 #include "cuTWED_core.h"
 #undef REAL_t
 #undef _TWED_MALLOC_DEV
@@ -100,6 +135,7 @@ static __inline__ __host__ __device__ diagIdx_t map_rc_to_diag(int row, int col)
 #undef _TWED
 #undef _TWED_BATCH_DEV
 #undef _TWED_BATCH
+#undef _GEAM
 
 #define REAL_t float
 #define _TWED_MALLOC_DEV twed_malloc_devf
@@ -109,6 +145,7 @@ static __inline__ __host__ __device__ diagIdx_t map_rc_to_diag(int row, int col)
 #define _TWED twedf
 #define _TWED_BATCH_DEV twed_batch_devf
 #define _TWED_BATCH twed_batchf
+#define _GEAM cublasSgeam
 #include "cuTWED_core.h"
 #undef REAL_t
 #undef _TWED_MALLOC_DEV
@@ -118,4 +155,4 @@ static __inline__ __host__ __device__ diagIdx_t map_rc_to_diag(int row, int col)
 #undef _TWED
 #undef _TWED_BATCH_DEV
 #undef _TWED_BATCH
-
+#undef _GEAM

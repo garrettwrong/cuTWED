@@ -626,6 +626,60 @@ extern "C" {
 
     if(tri == -2){
       //transpose
+      //cudaError_t cudaStat;
+      cublasStatus_t stat;
+      cublasHandle_t handle;
+      REAL_t *B = NULL;
+      REAL_t alpha = 1.0;
+      REAL_t beta = 0.0;
+      REAL_t* devPtrA = NULL;
+      REAL_t* devPtrC = NULL;
+      HANDLE_ERROR(cudaMalloc(&devPtrA, nBB*nBB*sizeof(*devPtrA)));
+      HANDLE_ERROR(cudaMalloc(&devPtrC, nBB*nBB*sizeof(*devPtrC)));
+
+      stat = cublasCreate(&handle);
+      if (stat != CUBLAS_STATUS_SUCCESS) {
+        printf ("CUBLAS initialization failed\n");
+        return EXIT_FAILURE;
+      }
+
+      stat = cublasSetMatrix (nBB, nBB, sizeof(*RRes), RRes, nBB, devPtrA, nBB);
+      if (stat != CUBLAS_STATUS_SUCCESS) {
+        printf(_cudaGetErrorEnum(stat));
+        printf ("\ndata download failed\n");
+        cudaFree (devPtrA);
+        cublasDestroy(handle);
+        return EXIT_FAILURE;
+      }
+
+      //call geam, for now, do nothing
+      stat = _GEAM(handle,
+                   CUBLAS_OP_T,
+                   CUBLAS_OP_N,
+                   nBB, nBB,
+                   &alpha,
+                   devPtrA, nBB,
+                   &beta,
+                   B, nBB,
+                   devPtrC, nBB);
+      if (stat != CUBLAS_STATUS_SUCCESS) {
+        printf(_cudaGetErrorEnum(stat));
+        printf ("\nCUBLAS geam failed\n");
+        return EXIT_FAILURE;
+      }
+
+
+      stat = cublasGetMatrix (nBB, nBB, sizeof(*RRes), devPtrC, nBB, RRes, nBB);
+      if (stat != CUBLAS_STATUS_SUCCESS) {
+        printf ("data upload failed");
+        cudaFree (devPtrA);
+        cudaFree (devPtrC);
+        cublasDestroy(handle);
+        return EXIT_FAILURE;
+      }
+
+      cublasDestroy(handle);
+      HANDLE_ERROR(cudaFree(devPtrA));
     }
 
     return 0;

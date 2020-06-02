@@ -93,3 +93,16 @@ def test_basic_batch_tril():
     # print("Ref\n",Ref)
     lower_tri = np.tril(Ref,-1)
     assert np.allclose(lower_tri, Res)
+
+def test_basic_batch_triu():
+    """ Test calling twed_batch using GPUarrays. """
+
+    # Call TWED
+    Res = twed_batch(AA[0:batch_sz//2] , TAA[0:batch_sz//2],
+                     BB[0:batch_sz//2], TBB[0:batch_sz//2], nu, lamb, degree, tri=-2)
+
+    print('Python Device Batch cuTWED distances triu:')
+    print(Res)
+    # print("Ref\n",Ref)
+    upper_tri = np.triu(Ref[:batch_sz//2,:batch_sz//2], 1)
+    assert np.allclose(upper_tri, Res)

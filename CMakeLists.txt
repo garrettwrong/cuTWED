@@ -12,6 +12,7 @@ set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -arch=sm_75 -gencode=arch=compute_30,code
 
 include_directories(src)
 cuda_add_library(cuTWED SHARED src/cuTWED.cu)
+target_link_libraries(cuTWED cublas)
 
 cuda_add_executable(test.x tests/test.cu)
 target_link_libraries(test.x cuTWED)
