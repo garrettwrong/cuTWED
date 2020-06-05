@@ -82,27 +82,32 @@ def test_basic_batch_float():
     # print("Ref\n",Ref)
     assert np.allclose(Ref, Res)
 
+
 def test_basic_batch_tril():
-    """ Test calling twed_batch using GPUarrays. """
+    """ Test calling twed_batch using GPUarrays, lower triangle optimization.  """
 
     # Call TWED
-    Res = twed_batch(AA, TAA, BB, TBB, nu, lamb, degree, tri=-1)
+    Res = twed_batch(AA, TAA, BB, TBB, nu, lamb, degree, tri='tril')
 
     print('Python Device Batch cuTWED distances tril:')
     print(Res)
     # print("Ref\n",Ref)
-    lower_tri = np.tril(Ref,-1)
+    lower_tri = np.tril(Ref, -1)
     assert np.allclose(lower_tri, Res)
 
+
 def test_basic_batch_triu():
-    """ Test calling twed_batch using GPUarrays. """
+    """
+    Test calling twed_batch using GPUarrays, upper triangle optimization.
+    Note uses cuBLAS for transpose, but its kind of stupid to do this
+    instead of tril in most cases...
+    """
 
     # Call TWED
-    Res = twed_batch(AA[0:batch_sz//2] , TAA[0:batch_sz//2],
-                     BB[0:batch_sz//2], TBB[0:batch_sz//2], nu, lamb, degree, tri=-2)
+    Res = twed_batch(BB, TBB, AA, TAA, nu, lamb, degree, tri='triu')
 
     print('Python Device Batch cuTWED distances triu:')
     print(Res)
     # print("Ref\n",Ref)
-    upper_tri = np.triu(Ref[:batch_sz//2,:batch_sz//2], 1)
+    upper_tri = np.triu(Ref, 1)
     assert np.allclose(upper_tri, Res)

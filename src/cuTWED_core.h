@@ -472,7 +472,7 @@ extern "C" {
   int _TWED_BATCH(REAL_t AA[], int nA, REAL_t TAA[],
                   REAL_t BB[], int nB, REAL_t TBB[],
                   REAL_t nu, REAL_t lambda, int degree, int dim,
-                  int nAA, int nBB, REAL_t* RRes, int tri){
+                  int nAA, int nBB, REAL_t* RRes, TRI_OPT_t tri){
     REAL_t *AA_dev, *TAA_dev;
     REAL_t *BB_dev, *TBB_dev;
     int result;
@@ -504,7 +504,7 @@ extern "C" {
   int _TWED_BATCH_DEV(REAL_t AA_dev[], int nA, REAL_t TAA_dev[],
                       REAL_t BB_dev[], int nB, REAL_t TBB_dev[],
                       REAL_t nu, REAL_t lambda, int degree, int dim,
-                      int nAA, int nBB, REAL_t* RRes, int tri){
+                      int nAA, int nBB, REAL_t* RRes, TRI_OPT_t tri){
     REAL_t *DA_dev;
     REAL_t *DBB_dev;
     REAL_t *Res_dev_write;
@@ -514,11 +514,12 @@ extern "C" {
     /*
       tri= 0 for complete matrix (typical). Note -1, -2 require symmetric batch (dist matrix).
       tri=-1 for lower (tril)
-      tri=-2 triu for upper (triu). Note, triu will compute tril then transpose.
+      tri=-2 triu for upper (triu). Note, triu will compute tril then transpose, which is
+      not very effecient, but I offer for convenience.
     */
 
     tril = -1;  /* defaul tri optimizations off */
-    if(tri == -1 || tri == -2){
+    if(tri == TRIL || tri == TRIU){
       if(nAA != nBB){
         fprintf(stderr, "Error. To use the triangular optimization, you must request a symmetric batch.\n");
         return -2;
@@ -564,6 +565,8 @@ extern "C" {
     const size_t szr = nBB * sizeof(*BB_dev);
     HANDLE_ERROR(cudaMalloc(&Res_dev_write, szr));
     HANDLE_ERROR(cudaMalloc(&Res_dev_read, szr));
+    HANDLE_ERROR(cudaMemset(Res_dev_write, 0, szr));
+    HANDLE_ERROR(cudaMemset(Res_dev_read, 0, szr));
     REAL_t* tmp_ptr;
 
 
@@ -624,7 +627,7 @@ extern "C" {
       HANDLE_ERROR(cudaStreamDestroy(streams[s]));
     }
 
-    if(tri == -2){
+    if(tri == TRIU){
       //transpose
       //cudaError_t cudaStat;
       cublasStatus_t stat;
@@ -640,7 +643,7 @@ extern "C" {
       stat = cublasCreate(&handle);
       if (stat != CUBLAS_STATUS_SUCCESS) {
         printf ("CUBLAS initialization failed\n");
-        return EXIT_FAILURE;
+        return -EXIT_FAILURE;
       }
 
       stat = cublasSetMatrix (nBB, nBB, sizeof(*RRes), RRes, nBB, devPtrA, nBB);
@@ -649,10 +652,10 @@ extern "C" {
         printf ("\ndata download failed\n");
         cudaFree (devPtrA);
         cublasDestroy(handle);
-        return EXIT_FAILURE;
+        return -EXIT_FAILURE;
       }
 
-      //call geam, for now, do nothing
+      /* call geam */
       stat = _GEAM(handle,
                    CUBLAS_OP_T,
                    CUBLAS_OP_N,
@@ -665,7 +668,7 @@ extern "C" {
       if (stat != CUBLAS_STATUS_SUCCESS) {
         printf(_cudaGetErrorEnum(stat));
         printf ("\nCUBLAS geam failed\n");
-        return EXIT_FAILURE;
+        return -EXIT_FAILURE;
       }
 
 
@@ -675,11 +678,12 @@ extern "C" {
         cudaFree (devPtrA);
         cudaFree (devPtrC);
         cublasDestroy(handle);
-        return EXIT_FAILURE;
+        return -EXIT_FAILURE;
       }
 
       cublasDestroy(handle);
       HANDLE_ERROR(cudaFree(devPtrA));
+      HANDLE_ERROR(cudaFree(devPtrC));
     }
 
     return 0;
