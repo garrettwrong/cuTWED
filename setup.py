@@ -35,7 +35,7 @@ if 'TOXENV' in os.environ and 'SETUPPY_CFLAGS' in os.environ:
 
 setup(
     name='cuTWED',
-    version='1.1.0',
+    version='2.0.0',
     description='A linear memory CUDA Time Warp Edit Distance algorithm.',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -77,6 +77,7 @@ setup(
     extras_require={
         'dev': ['tox',
                 'pytest',
+                'bumpversion',
                 'check-manifest',
                 'coverage',
                 'docutils>=0.11',
