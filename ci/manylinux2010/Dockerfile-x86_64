@@ -71,6 +71,8 @@ WORKDIR /io
 RUN mkdir build && \
     cd build && \
     /cmake-3.18.0-Linux-x86_64/bin/cmake ../ && \
-    make
+    make install
+# push the lib onto the path
+#ENV LD_LIBRARY_PATH /io/lib:$LD_LIBRARY_PATH
 
 CMD ["/bin/bash"]
