@@ -8,13 +8,12 @@ cuTWED v2.0.0.
 |GitHub release|
 |Open Source Love svg1|
 
-A linear memory CUDA adaptation of the Time Warp Edit Distance
-algorithm.
+A linear memory CUDA algorithm for solving Time Warp Edit Distance.
 
 About
 -----
 
-This is a novel parallel implementation of the Time Warp Edit Distance.
+This is a novel parallel implementation of Time Warp Edit Distance.
 The original algorithm was described by Marteau in:
 ``Time Warp Edit Distance with Stiffness Adjustment for Time Series Matching (2009)``.
 A variant of the code from that paper is included in
