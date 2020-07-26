@@ -21,7 +21,9 @@
 extern "C" {
 #endif
 
-
+  typedef enum TRI_OPT {TRIU=-2,
+                        TRIL=-1,
+                        NOPT=0} TRI_OPT_t;
 
   /*
     A, B are arrays of time series values.
@@ -95,22 +97,22 @@ extern "C" {
   int twed_batch(double AA_dev[], int nA, double TAA_dev[],
                  double BB_dev[], int nB, double TBB_dev[],
                  double nu, double lambda, int degree, int dim,
-                 int nAA, int nBB, double* RRes);
+                 int nAA, int nBB, double* RRes, TRI_OPT_t tri);
 
   int twed_batchf(float AA_dev[], int nA, float TAA_dev[],
                   float BB_dev[], int nB, float TBB_dev[],
                   float nu, float lambda, int degree, int dim,
-                  int nAA, int nBB, float* RRes);
+                  int nAA, int nBB, float* RRes, TRI_OPT_t tri);
 
   int twed_batch_dev(double AA_dev[], int nA, double TAA_dev[],
                      double BB_dev[], int nB, double TBB_dev[],
                      double nu, double lambda, int degree, int dim,
-                     int nAA, int nBB, double* RRes);
+                     int nAA, int nBB, double* RRes, TRI_OPT_t tri);
 
   int twed_batch_devf(float AA_dev[], int nA, float TAA_dev[],
                       float BB_dev[], int nB, float TBB_dev[],
                       float nu, float lambda, int degree, int dim,
-                      int nAA, int nBB, float* RRes);
+                      int nAA, int nBB, float* RRes, TRI_OPT_t tri);
 
 
 #ifdef __cplusplus

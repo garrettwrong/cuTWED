@@ -316,7 +316,7 @@ __global__ void result_agg_kernel(REAL_t* __restrict__ res,
 
 static void grid_evalZ(const REAL_t* __restrict__ A, const REAL_t* __restrict__ DA, int nA, const REAL_t* __restrict__ TA,
                        const REAL_t* __restrict__ BB, const REAL_t* __restrict__ DBB, int nB, const REAL_t* __restrict__ TBB,
-                       REAL_t nu, int degree, REAL_t lambda, int dim, REAL_t* __restrict__ Res_dev, int nAA, int nBB){
+                       REAL_t nu, int degree, REAL_t lambda, int dim, REAL_t* __restrict__ Res_dev, int nAA, int nBB, int tril){
   const int n = (nA+1) + (nB+1) -1;
   dim3 block_dim(32, 32); /* note this particular var might be sensitive to tuning and architectures... */
   int diagIdx;
@@ -331,6 +331,10 @@ static void grid_evalZ(const REAL_t* __restrict__ A, const REAL_t* __restrict__ 
   HANDLE_ERROR(cudaMalloc(&DP_diag_lag_2, sz));
 
   HANDLE_ERROR(cudaPeekAtLastError());
+
+  if(tril != -1 ){
+    nBB = tril;
+  }
 
   for(diagIdx=0; diagIdx < n; diagIdx++){
 
@@ -468,7 +472,7 @@ extern "C" {
   int _TWED_BATCH(REAL_t AA[], int nA, REAL_t TAA[],
                   REAL_t BB[], int nB, REAL_t TBB[],
                   REAL_t nu, REAL_t lambda, int degree, int dim,
-                  int nAA, int nBB, REAL_t* RRes){
+                  int nAA, int nBB, REAL_t* RRes, TRI_OPT_t tri){
     REAL_t *AA_dev, *TAA_dev;
     REAL_t *BB_dev, *TBB_dev;
     int result;
@@ -484,9 +488,9 @@ extern "C" {
 
     /* compute TWED on device */
     result = _TWED_BATCH_DEV(AA_dev, nA, TAA_dev,
-                            BB_dev, nB, TBB_dev,
-                            nu, lambda, degree, dim,
-                            nAA, nBB, RRes);
+                             BB_dev, nB, TBB_dev,
+                             nu, lambda, degree, dim,
+                             nAA, nBB, RRes, tri);
 
     /* cleanup device memory initialized here */
     _TWED_FREE_DEV(AA_dev, TAA_dev,
@@ -500,12 +504,29 @@ extern "C" {
   int _TWED_BATCH_DEV(REAL_t AA_dev[], int nA, REAL_t TAA_dev[],
                       REAL_t BB_dev[], int nB, REAL_t TBB_dev[],
                       REAL_t nu, REAL_t lambda, int degree, int dim,
-                      int nAA, int nBB, REAL_t* RRes){
+                      int nAA, int nBB, REAL_t* RRes, TRI_OPT_t tri){
     REAL_t *DA_dev;
     REAL_t *DBB_dev;
     REAL_t *Res_dev_write;
     REAL_t *Res_dev_read;
     int a;
+    int tril;
+    /*
+      tri= 0 for complete matrix (typical). Note -1, -2 require symmetric batch (dist matrix).
+      tri=-1 for lower (tril)
+      tri=-2 triu for upper (triu). Note, triu will compute tril then transpose, which is
+      not very effecient, but I offer for convenience.
+    */
+
+    tril = -1;  /* defaul tri optimizations off */
+    if(tri == TRIL || tri == TRIU){
+      if(nAA != nBB){
+        fprintf(stderr, "Error. To use the triangular optimization, you must request a symmetric batch.\n");
+        return -2;
+      }
+      tril = 0;  /* tri opt on */
+    }
+
 
     /*
       Sanity Check
@@ -544,6 +565,8 @@ extern "C" {
     const size_t szr = nBB * sizeof(*BB_dev);
     HANDLE_ERROR(cudaMalloc(&Res_dev_write, szr));
     HANDLE_ERROR(cudaMalloc(&Res_dev_read, szr));
+    HANDLE_ERROR(cudaMemset(Res_dev_write, 0, szr));
+    HANDLE_ERROR(cudaMemset(Res_dev_read, 0, szr));
     REAL_t* tmp_ptr;
 
 
@@ -572,11 +595,14 @@ extern "C" {
       We process diagonals moving the diagonal from upper left to lower right.
       Each element of a diag is done in parallel.
     */
+      if(tril != -1){
+        tril = a;
+      }
 
       grid_evalZ(&AA_dev[a*nA*dim], DA_dev, nA, &TAA_dev[a*nA],
                  BB_dev, DBB_dev, nB, TBB_dev,
                  nu, degree, lambda, dim,
-                 Res_dev_write, nAA, nBB);
+                 Res_dev_write, nAA, nBB, tril);
       HANDLE_ERROR(cudaPeekAtLastError());
 
       HANDLE_ERROR(cudaDeviceSynchronize());
@@ -599,6 +625,65 @@ extern "C" {
 
     for(s=0; s<nstreams; s++){
       HANDLE_ERROR(cudaStreamDestroy(streams[s]));
+    }
+
+    if(tri == TRIU){
+      //transpose
+      //cudaError_t cudaStat;
+      cublasStatus_t stat;
+      cublasHandle_t handle;
+      REAL_t *B = NULL;
+      REAL_t alpha = 1.0;
+      REAL_t beta = 0.0;
+      REAL_t* devPtrA = NULL;
+      REAL_t* devPtrC = NULL;
+      HANDLE_ERROR(cudaMalloc(&devPtrA, nBB*nBB*sizeof(*devPtrA)));
+      HANDLE_ERROR(cudaMalloc(&devPtrC, nBB*nBB*sizeof(*devPtrC)));
+
+      stat = cublasCreate(&handle);
+      if (stat != CUBLAS_STATUS_SUCCESS) {
+        printf ("CUBLAS initialization failed\n");
+        return -EXIT_FAILURE;
+      }
+
+      stat = cublasSetMatrix (nBB, nBB, sizeof(*RRes), RRes, nBB, devPtrA, nBB);
+      if (stat != CUBLAS_STATUS_SUCCESS) {
+        printf(_cudaGetErrorEnum(stat));
+        printf ("\ndata download failed\n");
+        cudaFree (devPtrA);
+        cublasDestroy(handle);
+        return -EXIT_FAILURE;
+      }
+
+      /* call geam */
+      stat = _GEAM(handle,
+                   CUBLAS_OP_T,
+                   CUBLAS_OP_N,
+                   nBB, nBB,
+                   &alpha,
+                   devPtrA, nBB,
+                   &beta,
+                   B, nBB,
+                   devPtrC, nBB);
+      if (stat != CUBLAS_STATUS_SUCCESS) {
+        printf(_cudaGetErrorEnum(stat));
+        printf ("\nCUBLAS geam failed\n");
+        return -EXIT_FAILURE;
+      }
+
+
+      stat = cublasGetMatrix (nBB, nBB, sizeof(*RRes), devPtrC, nBB, RRes, nBB);
+      if (stat != CUBLAS_STATUS_SUCCESS) {
+        printf ("data upload failed");
+        cudaFree (devPtrA);
+        cudaFree (devPtrC);
+        cublasDestroy(handle);
+        return -EXIT_FAILURE;
+      }
+
+      cublasDestroy(handle);
+      HANDLE_ERROR(cudaFree(devPtrA));
+      HANDLE_ERROR(cudaFree(devPtrC));
     }
 
     return 0;

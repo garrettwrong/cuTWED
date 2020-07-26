@@ -21,6 +21,18 @@ import numpy as np
 from _cuTWED import ffi
 from _cuTWED import lib
 
+TRI_OPT = {'triu': lib.TRIU,
+           'tril': lib.TRIL,
+           'nopt': lib.NOPT}
+
+
+def _get_tri_opt(opt):
+    if isinstance(opt, int):
+        assert opt in TRI_OPT.values()
+    else:
+        opt = TRI_OPT.get(opt.lower())
+    return opt
+
 
 def twed(A, TA, B, TB, nu, lamb, degree=2):
     """
@@ -130,7 +142,7 @@ def twed_dev(A, TA, B, TB, nu, lamb, degree=2):
     return result
 
 
-def twed_batch_dev(AA, TAA, BB, TBB, nu, lamb, degree=2):
+def twed_batch_dev(AA, TAA, BB, TBB, nu, lamb, degree=2, tri=lib.NOPT):
     """
     Invokes CUDA based batch twed using ctypes wrapper.
 
@@ -138,6 +150,8 @@ def twed_batch_dev(AA, TAA, BB, TBB, nu, lamb, degree=2):
     TA, TB: GPUArrays of corresponding time series timestamps.
     degree: Power used in the Lp norm, default is 2.
     nu, lamb: algo parameters.
+    tri: Triangle Optimization for Square Symmetric batches. defaults 'noopt',
+    Permits 'triu', 'tril'.  Probably want tril for square symmetric case.
     """
 
     if AA.ndim == 2:
@@ -186,7 +200,7 @@ def twed_batch_dev(AA, TAA, BB, TBB, nu, lamb, degree=2):
     ret_code = func(caster(AA), nA, caster(TAA),
                     caster(BB), nB, caster(TBB),
                     nu, lamb, degree, dim,
-                    nAA, nBB, RRes_ptr)
+                    nAA, nBB, RRes_ptr, _get_tri_opt(tri))
 
     if ret_code != 0:
         raise RuntimeError(f"cuTWED call failed with {ret_code}.")
@@ -194,7 +208,7 @@ def twed_batch_dev(AA, TAA, BB, TBB, nu, lamb, degree=2):
     return RRes
 
 
-def twed_batch(AA, TAA, BB, TBB, nu, lamb, degree=2):
+def twed_batch(AA, TAA, BB, TBB, nu, lamb, degree=2, tri=lib.NOPT):
     """
     Invokes CUDA based batch twed using ctypes wrapper.
 
@@ -203,6 +217,8 @@ def twed_batch(AA, TAA, BB, TBB, nu, lamb, degree=2):
     TA, TB: Numpy C Arrays of corresponding time series timestamps.
     degree: Power used in the Lp norm, default is 2.
     nu, lamb: algo parameters.
+    tri: Triangle Optimization for Square Symmetric batches. defaults 'noopt',
+    Permits 'triu', 'tril'. Probably want tril for square symmetric case.
     """
 
     if AA.ndim == 2:
@@ -247,7 +263,7 @@ def twed_batch(AA, TAA, BB, TBB, nu, lamb, degree=2):
     ret_code = func(caster(AA), nA, caster(TAA),
                     caster(BB), nB, caster(TBB),
                     nu, lamb, degree, dim,
-                    nAA, nBB, caster(RRes))
+                    nAA, nBB, caster(RRes), _get_tri_opt(tri))
 
     if ret_code != 0:
         raise RuntimeError(f"cuTWED call failed with {ret_code}.")
