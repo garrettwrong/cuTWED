@@ -54,7 +54,7 @@ Reference Implementation
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Marteau's original code with a some minor changes has been included in
-this package. It is built both as a C library and part of the python
+this package. It is built both as a C library and part of the Python
 package ``cuTWED.ctwed``. The minor changes are an extra argument
 ``dimension`` to admit ``R^N`` inputs, and more common handling of norm
 (nth-root). These modications were made to facilitate refence testing
@@ -66,6 +66,16 @@ implementations too slow.
 Getting Started
 ---------------
 
+For many users the prepackaged (linux) Python distribution is the
+simplest way to get the code.  If you have CUDA10/11 and a Python 3.6+
+manylinux compatible installation you can try the prepackged wheels with:
+
+`pip install cuTWED`
+
+For other situations, or users seeking maximum performance, instructions
+follow for building the core CUDA libray, installing, and building
+the Python bindings from source.
+
 Requirements
 ~~~~~~~~~~~~
 
@@ -73,26 +83,24 @@ For the CUDA code you will need NVCC, a CUDA capable card and CMake.
 Otherwise, the CUDA code has no dependencies.
 
 If you do not have CMake or it is too old, a lot of people just pip
-install it ``pip install cmake>=3.11``.
+install it ``pip install cmake>=3.11``. Otherwise you'll need to
+refer to their (Kitware) docs for your situation.
 
 For the Python binding ``pip`` manages the specific depends and
 installation of the Python interface after you have built the main CUDA
 C library. Generally requires ``numpy``, ``pycuda``, and ``cffi``. I
-recommend you use virtualenv or conda to manage python.
+recommend you use virtualenv or conda to manage Python.
 
 Building
 ~~~~~~~~
 
-Building has two stages. First the CUDA C library is built. It can be
-permanently installed to your system, or just append the path to
-``libcuTWED.so`` onto your ``LD_LIBRARY_PATH``. That can be either
-temorarily or in your ``.bashrc`` etc. If you follow this guide on linux
-things should probably work. If you customize, you may have to manage
-your LD\_LIBRARY\_PATH, LIBRARY\_PATH, and INCLUDES in ways that are
-more typical of C/C++ libraries then python...
+Building has two stages.
+First the CUDA C library is built and installed.
+Second the Python bindings (if desired) are built on top of that.
 
-If you would like the python bindings, I have (with great pain) formed a
-pip installable package for the bindings.
+The CUDA C library may be permanently installed to your system,
+in a standard fashion, with some customization via CMake.
+Alternatively a manual local install option is described below.
 
 Building the core CUDA C library
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -116,15 +124,17 @@ Note you may customize the call to ``cmake`` below with flags like
 
 This should create several files in the ``build`` directory including
 ``libcuTWED.so``, ``*.h`` headers, and some other stuff. To install to
-your system (may require sudo):
+your system permanently (may require sudo):
 
 ::
 
     make install
 
-If you just want to temporarily have the library available on your linux
-machine you can just use the LD path. This makes no changes to your
-system outside the repo and this shell process.
+If you would rather just want to temporarily have the library
+available on your linux machine you can just use the LD path.
+This makes no changes to your system outside the repo and this shell process.
+Assuming you are still in your `build` directory, add the library to your path.
+Users may decide to add a similar line permanently to their `.bashrc` or equivalent.
 
 ::
 
@@ -134,13 +144,13 @@ Python
 ^^^^^^
 
 Once you have the CUDA C library readied, we can use ``pip`` for the
-python bindings. From the root of the git repo:
+Python bindings. From the root of the git repo:
 
 ::
 
     pip install .
 
-If you are planning to edit the code, youmight prefer pip install in
+If you are planning to edit the code, you might prefer pip install in
 local editable mode instead.
 
 ::
@@ -169,7 +179,7 @@ run with:
 
 I hope to improve this soon, but there are a *lot* of complication
 running hybrid codes with free CI tools, and also packaging properly
-with python etc that need to be worked through. Some are most easily
+with Python etc that need to be worked through. Some are most easily
 addressed by using a managed CI host, but this is non free.... I suspect
 this is largely why you do not see a plethera of free high performance
 hybrid codes... perhaps a future project...
@@ -219,14 +229,14 @@ Python
 
     from cuTWED import twed
 
-For Python I have included basic pip installable python bindings. I use
+For Python I have included basic pip installable Python bindings. I use
 it in ``tests/test_basic.py``. If you are curious, these are implemented
 by a ``cffi`` backend which parses the C header. which is built for you
-by ``setuptools``. The main python interface is in ``cuTWED.py``. This
-requires that you have built the library, and have it available in your
-``LD_LIBRARY_PATH``.
+by ``setuptools``. The main Python interface is in ``cuTWED.py``. This
+requires that you have built the library, and have it installed in a
+location known to the system or available in your ``LD_LIBRARY_PATH``.
 
-I have also wrapped up the GPU only memory methods in python, using
+I have also wrapped up the GPU only memory methods in Python, using
 PyCUDA gpuarrays. Examples in double and single precision are in
 ``tests/test_basic_dev.py``.
 
@@ -241,7 +251,7 @@ before I push it. That gives back about another 20% in batch mode
 afaict.
 
 If you want to run Marteau's C code from Python you can try ``ctwed``.
-For very small problems you may find his original C code is faster.
+For (very) small problems you may find his original C code is faster.
 
 Troubleshooting and Known Issues
 --------------------------------
@@ -252,9 +262,6 @@ issues:
 -  Portability, I expect you have linux at this time.
 -  I have not had time to profile or optimize it, there are things I
    know to have improvements.
--  The python packaging requires you have the CUDA library locally or
-   system installed. When I surveyed the options that permit this via python
-   packaging, I didn't like any of the options. Still considering...
 
 If you find an issue or bug with the code, please submit an issue. More
 details about this can be found in the contributing document.
