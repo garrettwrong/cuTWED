@@ -207,7 +207,7 @@ better documentation, you may find example use in ``test_batch``,
 ``test_synthetic_validation.py``.
 
 I have included a Jupyter Notebook which demonstrates validation
-using the `UCI Pseudo Periodic Synthetic Time Series Data Set <http://archive.ics.uci.edu/ml/datasets/Pseudo+Periodic+Synthetic+Time+Series>`__. This is a much large dataset.
+using the `UCI Pseudo Periodic Synthetic Time Series Data Set <http://archive.ics.uci.edu/ml/datasets/Pseudo+Periodic+Synthetic+Time+Series>`__. This is a much larger dataset.
 
 Future plans include optimization and multi-gpu options for large
 batches..
@@ -252,9 +252,6 @@ issues:
 -  Portability, I expect you have linux at this time.
 -  I have not had time to profile or optimize it, there are things I
    know to have improvements.
--  Notably, the batch method computes the entire batch matrix,
-   not upper/lower triangle.  I have not had a chance validate the patches.
-   This would be a further speedup...
 -  The python packaging requires you have the CUDA library locally or
    system installed. When I surveyed the options that permit this via python
    packaging, I didn't like any of the options. Still considering...
