@@ -1,4 +1,4 @@
-cuTWED v1.1.0.
+cuTWED v2.0.0.
 ==============
 
 |Made With Python|
