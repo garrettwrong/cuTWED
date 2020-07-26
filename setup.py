@@ -77,6 +77,7 @@ setup(
     extras_require={
         'dev': ['tox',
                 'pytest',
+                'bumpversion',
                 'check-manifest',
                 'coverage',
                 'docutils>=0.11',
