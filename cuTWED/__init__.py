@@ -5,4 +5,4 @@ from .cuTWED import twed_batch_dev
 from .cuTWED import twed_dev
 
 __all__ = ["twed", "twed_dev", "twed_batch_dev", "twed_batch", 'ctwed']
-__version__ = '2.0.1'
+__version__ = '2.0.2'
