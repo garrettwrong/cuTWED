@@ -72,6 +72,7 @@ setup(
         'cffi>=1.0.0',
         'numpy',
         'pycuda',
+        'six',
         'tqdm',
     ],
     extras_require={
