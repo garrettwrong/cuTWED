@@ -6,3 +6,5 @@ RUN yum install epel-release -y
 RUN yum install cmake3 -y
 RUN yum install python36 python36-devel -y
 RUN python3.6 -m ensurepip
+# Note, numpy 1.20rc was being attempted and failing... I don't need that...
+RUN pip3 install 'numpy<1.20'
