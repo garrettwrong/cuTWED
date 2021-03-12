@@ -7,6 +7,7 @@ cuTWED v2.0.2.
 |GPLv3 license|
 |GitHub release|
 |Open Source Love svg1|
+|Gitlab CI badge|
 
 A linear memory CUDA algorithm for solving Time Warp Edit Distance.
 
@@ -283,3 +284,5 @@ Copyright 2020 Garrett Wright, Gestalt Group LLC
    :target: https://github.com/ellerbrock/open-source-badges/
 .. |Made With Python| image:: http://ForTheBadge.com/images/badges/made-with-python.svg
    :target: https://www.python.org/
+.. |Gitlab CI Badge| image:: https://gitlab.com/geebdubya/cuTWED/badges/master/pipeline.svg
+   :target: https://gitlab.com/geebdubya/cuTWED/-/commits/master
