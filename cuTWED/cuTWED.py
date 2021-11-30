@@ -146,7 +146,7 @@ def twed_batch_dev(AA, TAA, BB, TBB, nu, lamb, degree=2, tri=lib.NOPT):
     """
     Invokes CUDA based batch twed using ctypes wrapper.
 
-    AA, BA  : GPUArrays of time series values. size, (nAA,nA,dim) and (nBB,nA,dim
+    AA, BA  : GPUArrays of time series values. size, (nAA,nA,dim) and (nBB,nB,dim)
     TA, TB: GPUArrays of corresponding time series timestamps.
     degree: Power used in the Lp norm, default is 2.
     nu, lamb: algo parameters.
@@ -213,7 +213,7 @@ def twed_batch(AA, TAA, BB, TBB, nu, lamb, degree=2, tri=lib.NOPT):
     Invokes CUDA based batch twed using ctypes wrapper.
 
     AA, BA  : Numpy C Arrays of time series values.
-              size, (nAA,nA,dim) and (nBB,nA,dim)
+              size, (nAA,nA,dim) and (nBB,nB,dim)
     TA, TB: Numpy C Arrays of corresponding time series timestamps.
     degree: Power used in the Lp norm, default is 2.
     nu, lamb: algo parameters.
