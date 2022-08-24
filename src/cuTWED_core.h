@@ -367,40 +367,46 @@ static void grid_evalZ(const REAL_t* __restrict__ A, const REAL_t* __restrict__ 
 extern "C" {
 #endif
 
+  void _TWED_MALLOC_DVC(const int nA, REAL_t **A_dev, REAL_t  **TA_dev,
+                        const int dim, const int nAA){
+    const size_t sza = nAA*(nA+1) * sizeof(**A_dev);
+    HANDLE_ERROR(cudaMalloc(A_dev, sza*dim));
+    HANDLE_ERROR(cudaMalloc(TA_dev, sza));
+  }
+
   void _TWED_MALLOC_DEV(const int nA, REAL_t **A_dev, REAL_t  **TA_dev,
                         const int nB, REAL_t **B_dev, REAL_t  **TB_dev,
                         const int dim, const int nAA, const int nBB){
     /* malloc on gpu and copy */
-    const size_t sza = nAA*(nA+1) * sizeof(**A_dev);
-    HANDLE_ERROR(cudaMalloc(A_dev, sza*dim));
-    HANDLE_ERROR(cudaMalloc(TA_dev, sza));
-
-    const size_t szb = nBB*(nB+1) * sizeof(**B_dev);
-    HANDLE_ERROR(cudaMalloc(B_dev, szb*dim));
-    HANDLE_ERROR(cudaMalloc(TB_dev, szb));
+    _TWED_MALLOC_DVC(nA, A_dev, TA_dev, dim, nAA);
+    _TWED_MALLOC_DVC(nB, B_dev, TB_dev, dim, nBB);
   }
 
+
+  void _TWED_FREE_DVC(REAL_t *A_dev, REAL_t  *TA_dev) {
+    HANDLE_ERROR(cudaFree( A_dev));
+    HANDLE_ERROR(cudaFree(TA_dev));
+  }
 
   void _TWED_FREE_DEV(REAL_t *A_dev, REAL_t  *TA_dev,
                       REAL_t *B_dev, REAL_t  *TB_dev){
     /* In a minute I'll be free */
-    HANDLE_ERROR(cudaFree(A_dev));
-    HANDLE_ERROR(cudaFree(TA_dev));
-    HANDLE_ERROR(cudaFree(B_dev));
-    HANDLE_ERROR(cudaFree(TB_dev));
+    _TWED_FREE_DVC(A_dev, TA_dev);
+    _TWED_FREE_DVC(B_dev, TB_dev);
   }
 
+  void _TWED_COPY_TO_DVC(const int nA, REAL_t A[], REAL_t A_dev[], REAL_t TA[], REAL_t TA_dev[],
+                         const int dim, const int nAA){
+    const size_t sza = nAA*nA*sizeof(*A);
+    HANDLE_ERROR(cudaMemcpy(A_dev, A, sza*dim, cudaMemcpyHostToDevice));
+    HANDLE_ERROR(cudaMemcpy(TA_dev, TA, sza, cudaMemcpyHostToDevice));
+  }
 
   void _TWED_COPY_TO_DEV(const int nA, REAL_t A[], REAL_t A_dev[], REAL_t TA[], REAL_t TA_dev[],
                          const int nB, REAL_t B[], REAL_t B_dev[], REAL_t TB[], REAL_t TB_dev[],
                          const int dim, const int nAA, const int nBB){
-    const size_t sza = nAA*nA*sizeof(*A);
-    HANDLE_ERROR(cudaMemcpy(A_dev, A, sza*dim, cudaMemcpyHostToDevice));
-    HANDLE_ERROR(cudaMemcpy(TA_dev, TA, sza, cudaMemcpyHostToDevice));
-
-    const size_t szb = nBB*nB*sizeof(*B);
-    HANDLE_ERROR(cudaMemcpy(B_dev, B , szb*dim, cudaMemcpyHostToDevice));
-    HANDLE_ERROR(cudaMemcpy(TB_dev, TB, szb, cudaMemcpyHostToDevice));
+    _TWED_COPY_TO_DVC(nA, A, A_dev, TA, TA_dev, dim, nAA);
+    _TWED_COPY_TO_DVC(nB, B, B_dev, TB, TB_dev, dim, nBB);
   }
 
 
