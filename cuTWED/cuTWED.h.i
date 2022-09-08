@@ -13,19 +13,37 @@
   float twed_devf(float A_dev[], int nA, float TA_dev[],
                   float B_dev[], int nB, float TB_dev[],
                   float nu, float lambda, int degree, int dim);
+  void twed_malloc_dvc_time_steps(const int nA, double **TA_dev,
+                       const int nAA);
+  void twed_malloc_dvc_time_series(const int nA, double **A_dev,
+                       const int dim, const int nAA);
+  void twed_malloc_dvc(const int nA, double **A_dev, double **TA_dev,
+                       const int dim, const int nAA);
   void twed_malloc_dev(const int nA, double **A_dev, double **TA_dev,
                        const int nB, double **B_dev, double **TB_dev,
                        const int dim, const int nAA, const int nBB);
+  void twed_malloc_dvc_time_stepsf(const int nA, float **TA_dev,
+                        const int nAA);
+  void twed_malloc_dvc_time_seriesf(const int nA, float **A_dev,
+                        const int dim, const int nAA);
+  void twed_malloc_dvcf(const int nA, float **A_dev, float **TA_dev,
+                        const int dim, const int nAA);
   void twed_malloc_devf(const int nA, float **A_dev, float **TA_dev,
                         const int nB, float **B_dev, float **TB_dev,
                         const int dim, const int nAA, const int nBB);
+  void twed_free_dvc(double *A_dev, double *TA_dev);
   void twed_free_dev(double *A_dev, double *TA_dev,
                      double *B_dev, double *TB_dev);
+  void twed_free_dvcf(float *A_dev, float *TA_dev);
   void twed_free_devf(float *A_dev, float *TA_dev,
                       float *B_dev, float *TB_dev);
+  void twed_copy_to_dvc(const int nA, double A[], double A_dev[], double TA[], double TA_dev[],
+                        const int dim, const int nAA);
   void twed_copy_to_dev(const int nA, double A[], double A_dev[], double TA[], double TA_dev[],
                         const int nB, double B[], double B_dev[], double TB[], double TB_dev[],
                         const int dim, const int nAA, const int nBB);
+  void twed_copy_to_dvcf(const int nA, float A[], float A_dev[], float TA[], float TA_dev[],
+                         const int dim, const int nAA);
   void twed_copy_to_devf(const int nA, float A[], float A_dev[], float TA[], float TA_dev[],
                          const int nB, float B[], float B_dev[], float TB[], float TB_dev[],
                          const int dim, const int nAA, const int nBB);

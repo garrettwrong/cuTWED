@@ -118,8 +118,13 @@ static __inline__ __host__ __device__ diagIdx_t map_rc_to_diag(int row, int col)
 */
 
 #define REAL_t double
+#define _TWED_MALLOC_DVC_TIME_STEPS  twed_malloc_dvc_time_steps
+#define _TWED_MALLOC_DVC_TIME_SERIES twed_malloc_dvc_time_series
+#define _TWED_MALLOC_DVC twed_malloc_dvc
 #define _TWED_MALLOC_DEV twed_malloc_dev
+#define _TWED_FREE_DVC twed_free_dvc
 #define _TWED_FREE_DEV twed_free_dev
+#define _TWED_COPY_TO_DVC twed_copy_to_dvc
 #define _TWED_COPY_TO_DEV twed_copy_to_dev
 #define _TWED_DEV twed_dev
 #define _TWED twed
@@ -128,8 +133,13 @@ static __inline__ __host__ __device__ diagIdx_t map_rc_to_diag(int row, int col)
 #define _GEAM cublasDgeam
 #include "cuTWED_core.h"
 #undef REAL_t
+#undef _TWED_MALLOC_DVC_TIME_STEPS
+#undef _TWED_MALLOC_DVC_TIME_SERIES
+#undef _TWED_MALLOC_DVC
 #undef _TWED_MALLOC_DEV
+#undef _TWED_FREE_DVC
 #undef _TWED_FREE_DEV
+#undef _TWED_COPY_TO_DVC
 #undef _TWED_COPY_TO_DEV
 #undef _TWED_DEV
 #undef _TWED
@@ -138,8 +148,13 @@ static __inline__ __host__ __device__ diagIdx_t map_rc_to_diag(int row, int col)
 #undef _GEAM
 
 #define REAL_t float
+#define _TWED_MALLOC_DVC_TIME_STEPS  twed_malloc_dvc_time_stepsf
+#define _TWED_MALLOC_DVC_TIME_SERIES twed_malloc_dvc_time_seriesf
+#define _TWED_MALLOC_DVC twed_malloc_dvcf
 #define _TWED_MALLOC_DEV twed_malloc_devf
+#define _TWED_FREE_DVC twed_free_dvcf
 #define _TWED_FREE_DEV twed_free_devf
+#define _TWED_COPY_TO_DVC twed_copy_to_dvcf
 #define _TWED_COPY_TO_DEV twed_copy_to_devf
 #define _TWED_DEV twed_devf
 #define _TWED twedf
@@ -148,8 +163,13 @@ static __inline__ __host__ __device__ diagIdx_t map_rc_to_diag(int row, int col)
 #define _GEAM cublasSgeam
 #include "cuTWED_core.h"
 #undef REAL_t
+#undef _TWED_MALLOC_DVC_TIME_STEPS
+#undef _TWED_MALLOC_DVC_TIME_SERIES
+#undef _TWED_MALLOC_DVC
 #undef _TWED_MALLOC_DEV
+#undef _TWED_FREE_DVC
 #undef _TWED_FREE_DEV
+#undef _TWED_COPY_TO_DVC
 #undef _TWED_COPY_TO_DEV
 #undef _TWED_DEV
 #undef _TWED
