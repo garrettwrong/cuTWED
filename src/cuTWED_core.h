@@ -367,11 +367,22 @@ static void grid_evalZ(const REAL_t* __restrict__ A, const REAL_t* __restrict__ 
 extern "C" {
 #endif
 
+  void _TWED_MALLOC_DVC_TIME_SERIES(const int nA, REAL_t **A_dev,
+                        const int dim, const int nAA) {
+    const size_t sza = nAA*(nA+1) * sizeof(REAL_t);
+    HANDLE_ERROR(cudaMalloc(A_dev, sza*dim));
+  }
+
+  void _TWED_MALLOC_DVC_TIME_STEPS(const int nA, REAL_t  **TA_dev,
+                        const int nAA){
+    const size_t sza = nAA*(nA+1) * sizeof(REAL_t);
+    HANDLE_ERROR(cudaMalloc(TA_dev, sza));
+  }
+
   void _TWED_MALLOC_DVC(const int nA, REAL_t **A_dev, REAL_t  **TA_dev,
                         const int dim, const int nAA){
-    const size_t sza = nAA*(nA+1) * sizeof(**A_dev);
-    HANDLE_ERROR(cudaMalloc(A_dev, sza*dim));
-    HANDLE_ERROR(cudaMalloc(TA_dev, sza));
+    _TWED_MALLOC_DVC_TIME_SERIES(nA, A_dev, dim, nAA);
+    _TWED_MALLOC_DVC_TIME_STEPS(nA, TA_dev, nAA);
   }
 
   void _TWED_MALLOC_DEV(const int nA, REAL_t **A_dev, REAL_t  **TA_dev,
